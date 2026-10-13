@@ -1,0 +1,241 @@
+const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
+const { parse, compileTemplate } = require("@vue/compiler-sfc");
+
+const root = path.resolve(__dirname, "..");
+const homePath = path.join(root, "resources/js/components/frontend/home/HomeComponent.vue");
+const sliderPath = path.join(root, "resources/js/components/frontend/home/SliderComponent.vue");
+const legacyVideoCarouselPath = path.join(root, "resources/js/components/frontend/home/VideoCarouselComponent.vue");
+const navbarPath = path.join(root, "resources/js/components/layouts/frontend/FrontendNavBarComponent.vue");
+const quickActionsPath = path.join(root, "resources/js/components/layouts/frontend/FrontendQuickActionsComponent.vue");
+
+function readVue(filePath) {
+    return fs.readFileSync(filePath, "utf8");
+}
+
+function compileVueTemplate(filePath) {
+    const source = readVue(filePath);
+    const descriptor = parse(source, { filename: filePath }).descriptor;
+    assert(descriptor.template, `${path.basename(filePath)} should include a template`);
+
+    const result = compileTemplate({
+        source: descriptor.template.content,
+        filename: filePath,
+        id: path.basename(filePath)
+    });
+
+    assert.deepStrictEqual(
+        result.errors,
+        [],
+        `${path.basename(filePath)} template should compile without errors`
+    );
+
+    return source;
+}
+
+const homeSource = compileVueTemplate(homePath);
+
+assert(
+    homeSource.includes("<SliderComponent />"),
+    "HomeComponent should keep the homepage hero in the existing slider position"
+);
+
+assert(
+    homeSource.indexOf("<SliderComponent />") < homeSource.indexOf("<TrackOrderComponent />"),
+    "HomeComponent should place the video hero directly below the menu bar before track order content"
+);
+
+assert(
+    !homeSource.includes("VideoCarouselComponent"),
+    "HomeComponent should not render a separate video carousel below the hero"
+);
+
+const sliderSource = compileVueTemplate(sliderPath);
+
+assert(
+    sliderSource.includes("<video"),
+    "SliderComponent should render native video media as the homepage hero"
+);
+
+assert(
+    sliderSource.includes("autoplay") && sliderSource.includes("playsinline") && sliderSource.includes("muted") && sliderSource.includes("loop")
+        && sliderSource.includes('preload="auto"')
+        && sliderSource.includes("@canplay=\"playVideo\"")
+        && sliderSource.includes("@loadeddata=\"playVideo\""),
+    "Hero videos should autoplay silently, loop, eagerly load, and retry playback when media is ready"
+);
+
+assert(
+    !sliderSource.includes(":poster=")
+        && !sliderSource.includes("<img v-else")
+        && !sliderSource.includes("rcs-video-fallback-image")
+        && !sliderSource.includes("markVideoFailed")
+        && !sliderSource.includes("failed:"),
+    "Hero carousel should render videos only, without poster images or image fallbacks"
+);
+
+assert(
+    !sliderSource.includes(":navigation=")
+        && !sliderSource.includes(":pagination=")
+        && !sliderSource.includes("Navigation")
+        && !sliderSource.includes("Pagination"),
+    "Hero video carousel should be plain autoplay with no side navigation buttons or dot pagination"
+);
+
+assert(
+    sliderSource.includes("frontend.menu") && sliderSource.includes("rcs-hero-order-button"),
+    "Hero should place the functional Order Online button over the video carousel"
+);
+
+assert(
+    sliderSource.includes("rcs-hero-menu-button")
+        && sliderSource.includes("data-rcs-action=\"hero_menu_click\"")
+        && sliderSource.includes("fa-bowl-food")
+        && sliderSource.includes("{{ $t('label.menu') }}"),
+    "Hero should move the Menu action into a square button at the top right of the carousel with a modern food icon"
+);
+
+assert(
+    sliderSource.includes("setting.theme_logo")
+        && sliderSource.includes("rcs-hero-centered-logo")
+        && sliderSource.includes("rcs-hero-brand-stack")
+        && sliderSource.indexOf("rcs-hero-centered-logo") < sliderSource.indexOf("rcs-hero-order-button"),
+    "Hero should center the RC's logo and stack the Order Online button directly beneath it"
+);
+
+assert(
+    !sliderSource.includes("tel:+254712878787") && !sliderSource.includes("rcs-hero-copy") && !sliderSource.includes("rcs-hero-actions"),
+    "Hero should only keep the centered logo and order button, with call actions moved to floating controls"
+);
+
+assert(
+    sliderSource.includes("https://videos.pexels.com/video-files/5223106/5223106-hd_1920_1080_25fps.mp4")
+        && sliderSource.includes("https://videos.pexels.com/video-files/5821371/5821371-hd_1920_1080_30fps.mp4")
+        && sliderSource.includes("https://videos.pexels.com/video-files/9371315/9371315-hd_1920_1080_30fps.mp4")
+        && !sliderSource.includes("/images/seeder/slider/slider_one.png")
+        && !sliderSource.includes("/images/seeder/slider/slider_two.png")
+        && !sliderSource.includes("/images/seeder/slider/slider_three.png"),
+    "Plain video hero should use restaurant video URLs without local poster fallbacks"
+);
+
+assert(
+    sliderSource.includes("rcs-plain-video-carousel") && sliderSource.includes("rcs-plain-video"),
+    "SliderComponent should expose a plain video carousel structure"
+);
+
+assert(
+    sliderSource.includes('class="rcs-front-video-hero"') && !sliderSource.includes('class="container mt-5 mb-8 sm:mt-8"'),
+    "SliderComponent should render the video hero full-bleed without container margins"
+);
+
+const cssSource = fs.readFileSync(path.join(root, "resources/css/app.css"), "utf8");
+
+assert(
+    cssSource.includes(".ff-header .container { @apply h-[84px] lg:h-[58px] py-2 lg:py-0 }")
+        && cssSource.includes(".rcs-front-video-hero")
+        && cssSource.includes("calc(100vh - 58px)")
+        && cssSource.includes("calc(100vh - 84px)")
+        && !cssSource.includes("calc(100vh - 74px)")
+        && !cssSource.includes("calc(100vh - 118px)"),
+    "Header and hero CSS should use the shorter menu bar height offsets"
+);
+
+assert(
+    cssSource.includes(".rcs-hero-centered-logo img")
+        && cssSource.includes("width: 190px")
+        && cssSource.includes("height: 190px")
+        && cssSource.includes("background: transparent")
+        && cssSource.includes("border: 0")
+        && cssSource.includes("box-shadow: none")
+        && cssSource.includes("backdrop-filter: none")
+        && cssSource.includes("overflow: visible")
+        && cssSource.includes("max-width: 190px")
+        && cssSource.includes("max-height: 190px")
+        && cssSource.includes("scale(2.8)")
+        && !cssSource.includes(".rcs-video-fallback-image"),
+    "Hero logo should render plain at a smaller approved-review size, with no image fallback styling in the hero"
+);
+
+assert(
+    !cssSource.includes(".rcs-plain-video-carousel .swiper-button-prev")
+        && !cssSource.includes(".rcs-plain-video-carousel .swiper-pagination"),
+    "Hero CSS should not keep styles for removed side navigation buttons or dot pagination"
+);
+
+const navbarSource = compileVueTemplate(navbarPath);
+
+assert(
+    !navbarSource.includes("Order Online")
+        && !navbarSource.includes("tel:+254712878787")
+        && !navbarSource.includes("directions_click")
+        && !navbarSource.includes("{{ $t('label.menu') }}")
+        && !navbarSource.includes("frontend.menu"),
+    "Top menu bar should not render order, menu, call, or directions actions"
+);
+
+assert(
+    !navbarSource.includes("setting.theme_logo"),
+    "Top menu bar should not render the RC's logo"
+);
+
+const quickActionsSource = compileVueTemplate(quickActionsPath);
+const legacyVideoCarouselSource = compileVueTemplate(legacyVideoCarouselPath);
+
+assert(
+    quickActionsSource.includes("rcs-floating-actions")
+        && quickActionsSource.includes("whatsappUrl")
+        && quickActionsSource.includes("https://wa.me/254712878787")
+        && quickActionsSource.includes("tel:+254712878787")
+        && quickActionsSource.includes("directionsUrl")
+        && quickActionsSource.includes("fa-location-dot")
+        && quickActionsSource.includes("installPrompt")
+        && quickActionsSource.includes("beforeinstallprompt")
+        && quickActionsSource.includes("rcs-floating-action-install")
+        && quickActionsSource.includes("data-rcs-action=\"pwa_install_click\"")
+        && quickActionsSource.includes("fa-cloud-arrow-down")
+        && !quickActionsSource.includes("fa-location-arrow"),
+    "Floating controls should provide modern call, WhatsApp, directions, and PWA install actions"
+);
+
+assert(
+    !quickActionsSource.includes("order_click"),
+    "Floating controls should not duplicate the order action"
+);
+
+assert(
+    !legacyVideoCarouselSource.includes("fa-utensils")
+        && legacyVideoCarouselSource.includes("fa-bowl-food"),
+    "Legacy video carousel controls should use the newer food icon instead of the old fork-and-knife icon"
+);
+
+assert(
+    cssSource.includes(".rcs-hero-brand-overlay")
+        && cssSource.includes(".rcs-hero-brand-stack")
+        && cssSource.includes(".rcs-hero-order-button")
+        && cssSource.includes("gap: 18px")
+        && cssSource.includes("align-items: center")
+        && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
+        && cssSource.includes("font-size: 14px")
+        && cssSource.includes("font-weight: 700")
+        && cssSource.includes("letter-spacing: 0.01em")
+        && cssSource.includes("text-transform: none")
+        && cssSource.includes(".rcs-hero-menu-button")
+        && cssSource.includes("top: 20px")
+        && cssSource.includes("right: 20px")
+        && cssSource.includes("width: 72px")
+        && cssSource.includes("background: #F97316")
+        && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
+        && cssSource.includes("font-size: 11px")
+        && cssSource.includes(".rcs-floating-action-directions")
+        && cssSource.includes("background: #E11D48")
+        && cssSource.includes(".rcs-floating-action-install")
+        && cssSource.includes(".rcs-floating-action-menu")
+        && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")
+        && !cssSource.includes("background: linear-gradient(135deg, #53ab43, #fbb13c)")
+        && cssSource.includes(".rcs-floating-actions")
+        && cssSource.includes(".rcs-floating-action-whatsapp"),
+    "CSS should style the centered hero logo, orange floating menu button, calmer Order Online button text, and floating contact/install icons"
+);
+
+console.log("RC's home video hero contract passed");

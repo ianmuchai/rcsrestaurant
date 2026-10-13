@@ -1,0 +1,26 @@
+{
+    "name": "RC's Restaurant",
+    "short_name": "RC's",
+    "description": "Order from RC's Restaurant in Nairobi and Eastleigh.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#00A800",
+    "background_color": "#ffffff",
+    "categories": ["food", "shopping"],
+    "icons": [
+        {
+            "src": "/images/pwa/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/pwa/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

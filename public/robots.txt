@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://rcs.co.ke/sitemap.xml
