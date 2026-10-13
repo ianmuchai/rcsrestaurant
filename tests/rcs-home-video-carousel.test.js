@@ -97,11 +97,14 @@ assert(
 );
 
 assert(
-    sliderSource.includes("setting.theme_logo")
+    sliderSource.includes("heroLogoSrc")
+        && sliderSource.includes("setting.theme_favicon_logo")
+        && sliderSource.includes("setting.theme_logo")
+        && sliderSource.includes("rcs-logo-green-20261013")
         && sliderSource.includes("rcs-hero-centered-logo")
         && sliderSource.includes("rcs-hero-brand-stack")
         && sliderSource.indexOf("rcs-hero-centered-logo") < sliderSource.indexOf("rcs-hero-order-button"),
-    "Hero should center the RC's logo and stack the Order Online button directly beneath it"
+    "Hero should use the current green cache-busted square RC's logo and stack the Order Online button directly beneath it"
 );
 
 assert(
@@ -212,6 +215,11 @@ assert(
     cssSource.includes(".rcs-hero-brand-overlay")
         && cssSource.includes(".rcs-hero-brand-stack")
         && cssSource.includes(".rcs-hero-order-button")
+        && cssSource.includes("width: min(72vw, 260px)")
+        && cssSource.includes("margin-left: auto")
+        && cssSource.includes("margin-right: auto")
+        && cssSource.includes("align-self: center")
+        && cssSource.includes("text-align: center")
         && cssSource.includes("gap: 18px")
         && cssSource.includes("align-items: center")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
@@ -234,8 +242,12 @@ assert(
         && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")
         && !cssSource.includes("background: linear-gradient(135deg, #53ab43, #fbb13c)")
         && cssSource.includes(".rcs-floating-actions")
+        && cssSource.includes("left: 18px")
+        && cssSource.includes("bottom: 28px")
+        && cssSource.includes("flex-direction: row")
+        && cssSource.includes("transform: none")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the centered hero logo, fixed orange menu button, calmer Order Online button text, and floating contact icons"
+    "CSS should style the centered hero logo/order button, fixed orange menu button, and moved contact icons"
 );
 
 console.log("RC's home video hero contract passed");
