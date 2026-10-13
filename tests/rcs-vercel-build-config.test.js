@@ -4,6 +4,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const envConfigPath = path.join(root, "resources/js/config/env.js");
 const vercelPath = path.join(root, "vercel.json");
 const vercelOutputScriptPath = path.join(root, "scripts/prepare-vercel-output.js");
 const publicIndexHtmlPath = path.join(root, "public/index.html");
@@ -99,14 +100,27 @@ assert(
 const publicIndexHtml = fs.existsSync(publicIndexHtmlPath)
     ? fs.readFileSync(publicIndexHtmlPath, "utf8")
     : "";
+const envConfigSource = fs.readFileSync(envConfigPath, "utf8");
 
 assert(
     publicIndexHtml.includes("<!DOCTYPE html>")
         && publicIndexHtml.includes("<default-component />")
         && publicIndexHtml.includes('/js/app.js?v=20260723g')
         && publicIndexHtml.includes('/css/app.css?v=20260723g')
+        && publicIndexHtml.includes('const APP_URL = "https://rcs.co.ke";')
+        && publicIndexHtml.includes("const APP_KEY = ")
+        && !publicIndexHtml.includes("const APP_URL = window.location.origin;")
+        && !publicIndexHtml.includes('const APP_KEY = "";')
         && !publicIndexHtml.includes("<?php"),
-    "public/index.html should be a static Vue shell, not PHP, so browser navigation opens the website"
+    "public/index.html should be a static Vue shell with live API runtime config, not PHP"
+);
+
+assert(
+    envConfigSource.includes("runtimeWindow.APP_URL")
+        && envConfigSource.includes("runtimeWindow.APP_KEY")
+        && envConfigSource.includes("runtimeWindow.APP_URL || process.env.MIX_HOST")
+        && envConfigSource.includes("runtimeWindow.APP_KEY || process.env.MIX_API_KEY"),
+    "Vue env config should prefer runtime APP_URL and APP_KEY for static Vercel deployments"
 );
 
 const vercelOutputScript = fs.readFileSync(vercelOutputScriptPath, "utf8");
