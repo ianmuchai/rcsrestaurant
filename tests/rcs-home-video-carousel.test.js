@@ -146,7 +146,7 @@ assert(
 
 assert(
     cssSource.includes(".rcs-hero-centered-logo img")
-        && cssSource.includes("width: clamp(108px, 12vw, 142px)")
+        && cssSource.includes("width: clamp(132px, 15vw, 172px)")
         && cssSource.includes("height: auto")
         && cssSource.includes("background: transparent")
         && cssSource.includes("border: 0")
@@ -216,15 +216,20 @@ assert(
     cssSource.includes(".rcs-hero-brand-overlay")
         && cssSource.includes(".rcs-hero-brand-stack")
         && cssSource.includes(".rcs-hero-order-button")
-        && cssSource.includes("width: min(72vw, 260px)")
+        && cssSource.includes("width: min(78vw, 310px)")
         && cssSource.includes("margin-left: auto")
         && cssSource.includes("margin-right: auto")
         && cssSource.includes("align-self: center")
         && cssSource.includes("text-align: center")
-        && cssSource.includes("gap: 18px")
+        && cssSource.includes("gap: 34px")
+        && cssSource.includes("transform: translateY(34px)")
         && cssSource.includes("align-items: center")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
-        && cssSource.includes("font-size: 14px")
+        && cssSource.includes("width: clamp(132px, 15vw, 172px)")
+        && cssSource.includes("min-width: 212px")
+        && cssSource.includes("min-height: 56px")
+        && cssSource.includes("border-radius: 14px")
+        && cssSource.includes("font-size: 15px")
         && cssSource.includes("font-weight: 700")
         && cssSource.includes("letter-spacing: 0.01em")
         && cssSource.includes("text-transform: none")
@@ -248,7 +253,7 @@ assert(
         && cssSource.includes("flex-direction: column")
         && cssSource.includes("transform: none")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the smaller centered hero logo/order button, fixed orange menu button, and lower-right vertical contact icons"
+    "CSS should style the larger centered hero logo, lower rounded-square order button, fixed orange menu button, and lower-right vertical contact icons"
 );
 
 console.log("RC's home video hero contract passed");

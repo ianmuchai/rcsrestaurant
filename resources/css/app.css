@@ -1842,8 +1842,9 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    width: min(72vw, 260px);
+    gap: 34px;
+    width: min(78vw, 310px);
+    transform: translateY(34px);
     pointer-events: none;
 }
 
@@ -1856,7 +1857,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     display: flex;
     align-items: center;
     justify-content: center;
-    width: clamp(108px, 12vw, 142px);
+    width: clamp(132px, 15vw, 172px);
     height: auto;
     margin-left: auto;
     margin-right: auto;
@@ -1881,18 +1882,18 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     align-items: center;
     justify-content: center;
     align-self: center;
-    gap: 8px;
-    min-width: 188px;
-    min-height: 48px;
+    gap: 10px;
+    min-width: 212px;
+    min-height: 56px;
     margin-left: auto;
     margin-right: auto;
     border: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 999px;
-    padding: 13px 22px;
+    border-radius: 14px;
+    padding: 16px 28px;
     background: #00A800;
     color: #ffffff;
     font-family: "Inter", "Rubik", sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.01em;
     line-height: 1;
@@ -1986,17 +1987,23 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 }
 
 @media (max-width: 767px) {
+    .rcs-hero-brand-stack {
+        gap: 26px;
+        transform: translateY(24px);
+    }
+
     .rcs-hero-centered-logo {
-        width: clamp(92px, 26vw, 116px);
+        width: clamp(112px, 32vw, 140px);
         height: auto;
         padding: 0;
     }
 
     .rcs-hero-order-button {
-        min-width: 176px;
-        min-height: 46px;
-        padding: 12px 20px;
-        font-size: 13px;
+        min-width: 190px;
+        min-height: 52px;
+        border-radius: 13px;
+        padding: 14px 22px;
+        font-size: 14px;
     }
 
     .rcs-hero-menu-button {

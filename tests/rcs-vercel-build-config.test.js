@@ -44,6 +44,30 @@ assert.strictEqual(
     "vercel.json should publish the generated static directory, not Laravel public with index.php"
 );
 
+const htmlHeaders = Array.isArray(vercelConfig.headers)
+    ? vercelConfig.headers.filter((entry) => ["/", "/index.html"].includes(entry.source))
+    : [];
+
+assert.strictEqual(
+    htmlHeaders.length,
+    2,
+    "Vercel should define explicit homepage HTML headers so the deployment URL opens the site"
+);
+
+htmlHeaders.forEach((entry) => {
+    const headers = Object.fromEntries(entry.headers.map((header) => [header.key.toLowerCase(), header.value]));
+    assert.strictEqual(
+        headers["content-type"],
+        "text/html; charset=utf-8",
+        `${entry.source} should be served as HTML instead of a downloadable file`
+    );
+    assert.strictEqual(
+        headers["content-disposition"],
+        "inline",
+        `${entry.source} should open inline and not download automatically`
+    );
+});
+
 assert(
     fs.existsSync(vercelOutputScriptPath),
     "Vercel output preparation script should exist"
