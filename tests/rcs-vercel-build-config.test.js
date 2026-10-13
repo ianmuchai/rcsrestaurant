@@ -30,8 +30,8 @@ assert.strictEqual(
 
 assert.strictEqual(
     packageJson.engines.node,
-    "20.x",
-    "package.json should pin Node 20 for Vercel because Laravel Mix 6 is not reliable on newer local Node runtimes"
+    "24.x",
+    "package.json should pin Node 24 for Vercel because Node 20 is discontinued on the deployment platform"
 );
 
 assert.strictEqual(
