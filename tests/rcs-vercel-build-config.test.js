@@ -5,6 +5,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const vercelPath = path.join(root, "vercel.json");
+const vercelOutputScriptPath = path.join(root, "scripts/prepare-vercel-output.js");
 
 assert(
     fs.existsSync(vercelPath),
@@ -20,6 +21,12 @@ assert.strictEqual(
 );
 
 assert.strictEqual(
+    packageJson.scripts["vercel-build"],
+    "npm run production && node scripts/prepare-vercel-output.js",
+    "package.json should expose a Vercel build that creates a static HTML output directory"
+);
+
+assert.strictEqual(
     packageJson.engines.node,
     "20.x",
     "package.json should pin Node 20 for Vercel because Laravel Mix 6 is not reliable on newer local Node runtimes"
@@ -27,14 +34,30 @@ assert.strictEqual(
 
 assert.strictEqual(
     vercelConfig.buildCommand,
-    "npm run production",
-    "vercel.json should force Vercel to run the Laravel Mix production build instead of vite build"
+    "npm run vercel-build",
+    "vercel.json should run the Vercel static-output build instead of publishing Laravel PHP directly"
 );
 
 assert.strictEqual(
     vercelConfig.outputDirectory,
-    "public",
-    "vercel.json should publish the Laravel public directory after the Mix build"
+    "vercel-public",
+    "vercel.json should publish the generated static directory, not Laravel public with index.php"
+);
+
+assert(
+    fs.existsSync(vercelOutputScriptPath),
+    "Vercel output preparation script should exist"
+);
+
+const vercelOutputScript = fs.readFileSync(vercelOutputScriptPath, "utf8");
+
+assert(
+    vercelOutputScript.includes("vercel-public")
+        && vercelOutputScript.includes("index.html")
+        && vercelOutputScript.includes("index.php")
+        && vercelOutputScript.includes("fs.rmSync")
+        && vercelOutputScript.includes("<default-component />"),
+    "Vercel output script should copy assets, remove PHP entrypoints, and write a Vue HTML shell"
 );
 
 assert(
