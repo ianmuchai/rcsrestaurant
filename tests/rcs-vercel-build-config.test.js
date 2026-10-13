@@ -8,6 +8,7 @@ const envConfigPath = path.join(root, "resources/js/config/env.js");
 const vercelPath = path.join(root, "vercel.json");
 const vercelOutputScriptPath = path.join(root, "scripts/prepare-vercel-output.js");
 const publicIndexHtmlPath = path.join(root, "public/index.html");
+const masterBladePath = path.join(root, "resources/views/master.blade.php");
 const vercelIgnorePath = path.join(root, ".vercelignore");
 
 assert(
@@ -100,6 +101,7 @@ assert(
 const publicIndexHtml = fs.existsSync(publicIndexHtmlPath)
     ? fs.readFileSync(publicIndexHtmlPath, "utf8")
     : "";
+const masterBlade = fs.readFileSync(masterBladePath, "utf8");
 const envConfigSource = fs.readFileSync(envConfigPath, "utf8");
 
 assert(
@@ -107,12 +109,20 @@ assert(
         && publicIndexHtml.includes("<default-component />")
         && publicIndexHtml.includes('/js/app.js?v=20260723g')
         && publicIndexHtml.includes('/css/app.css?v=20260723g')
-        && publicIndexHtml.includes('const APP_URL = "https://rcs.co.ke";')
-        && publicIndexHtml.includes("const APP_KEY = ")
+        && publicIndexHtml.includes('window.APP_URL = "https://rcs.co.ke";')
+        && publicIndexHtml.includes("window.APP_KEY = ")
         && !publicIndexHtml.includes("const APP_URL = window.location.origin;")
-        && !publicIndexHtml.includes('const APP_KEY = "";')
+        && !publicIndexHtml.includes('window.APP_KEY = "";')
         && !publicIndexHtml.includes("<?php"),
     "public/index.html should be a static Vue shell with live API runtime config, not PHP"
+);
+
+assert(
+    masterBlade.includes("window.APP_URL")
+        && masterBlade.includes("window.APP_KEY")
+        && !masterBlade.includes("const APP_URL")
+        && !masterBlade.includes("const APP_KEY"),
+    "The Laravel shell should expose runtime config on window so Vue can read the same values in browser builds"
 );
 
 assert(

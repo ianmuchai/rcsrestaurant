@@ -265,10 +265,10 @@
     @endif
 
     <script>
-        const APP_URL = "{{ env('MIX_HOST') }}";
-        const APP_KEY = "{{ env('MIX_API_KEY') }}";
-        const GOOGLE_TOKEN = "{{ env('MIX_GOOGLE_MAP_KEY') }}";
-        const APP_DEMO = "{{ env('MIX_DEMO') }}";
+        window.APP_URL = "{{ env('MIX_HOST') }}";
+        window.APP_KEY = "{{ env('MIX_API_KEY') }}";
+        window.GOOGLE_TOKEN = "{{ env('MIX_GOOGLE_MAP_KEY') }}";
+        window.APP_DEMO = "{{ env('MIX_DEMO') }}";
     </script>
 
     <script src="{{ mix('js/app.js') }}?v=20260723g"></script>
