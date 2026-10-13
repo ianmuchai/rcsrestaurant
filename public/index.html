@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00A800">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="RC's">
+    <title>RC's Nairobi & Eastleigh | Halal Restaurant, Shawarma, Grills & Catering</title>
+    <meta name="description" content="Visit RC's at Moon Palace Hotel on General Waruingi Rd, Nairobi for halal dining, Somali-inspired meals, shawarma, grilled platters, family meals, desserts and catering.">
+    <meta name="author" content="RC's">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="/">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/images/pwa/icon-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/themes/default/fonts/fontawesome/fontawesome.css">
+    <link rel="stylesheet" href="/themes/default/fonts/lab/lab.css">
+    <link rel="stylesheet" href="/themes/default/fonts/typography/public/public.css">
+    <link rel="stylesheet" href="/themes/default/fonts/typography/rubik/rubik.css">
+    <link rel="stylesheet" href="/themes/default/css/custom.css?v1">
+    <link rel="stylesheet" href="/css/app.css?v=20260723g">
+</head>
+<body>
+    <div id="app">
+        <default-component />
+    </div>
+    <script>
+        const APP_URL = window.location.origin;
+        const APP_KEY = "";
+        const GOOGLE_TOKEN = "";
+        const APP_DEMO = "";
+    </script>
+    <script src="/js/app.js?v=20260723g"></script>
+    <script src="/themes/default/js/drawer.js"></script>
+    <script src="/themes/default/js/modal.js"></script>
+    <script src="/themes/default/js/customScript.js"></script>
+    <script src="/themes/default/js/tabs.js"></script>
+    <script src="/themes/default/js/dropdown.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function () {
+                navigator.serviceWorker.register("/sw.js").catch(function () {});
+            });
+        }
+    </script>
+</body>
+</html>

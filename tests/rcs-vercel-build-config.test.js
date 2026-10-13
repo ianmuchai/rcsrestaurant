@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, "..");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const vercelPath = path.join(root, "vercel.json");
 const vercelOutputScriptPath = path.join(root, "scripts/prepare-vercel-output.js");
+const publicIndexHtmlPath = path.join(root, "public/index.html");
 
 assert(
     fs.existsSync(vercelPath),
@@ -73,6 +74,24 @@ assert(
     "Vercel output preparation script should exist"
 );
 
+assert(
+    fs.existsSync(publicIndexHtmlPath),
+    "Public directory should include index.html so Vercel never serves public/index.php as a download"
+);
+
+const publicIndexHtml = fs.existsSync(publicIndexHtmlPath)
+    ? fs.readFileSync(publicIndexHtmlPath, "utf8")
+    : "";
+
+assert(
+    publicIndexHtml.includes("<!DOCTYPE html>")
+        && publicIndexHtml.includes("<default-component />")
+        && publicIndexHtml.includes('/js/app.js?v=20260723g')
+        && publicIndexHtml.includes('/css/app.css?v=20260723g')
+        && !publicIndexHtml.includes("<?php"),
+    "public/index.html should be a static Vue shell, not PHP, so browser navigation opens the website"
+);
+
 const vercelOutputScript = fs.readFileSync(vercelOutputScriptPath, "utf8");
 
 assert(
@@ -80,8 +99,9 @@ assert(
         && vercelOutputScript.includes("index.html")
         && vercelOutputScript.includes("index.php")
         && vercelOutputScript.includes("fs.rmSync")
-        && vercelOutputScript.includes("<default-component />"),
-    "Vercel output script should copy assets, remove PHP entrypoints, and write a Vue HTML shell"
+        && vercelOutputScript.includes('path.join(source, "index.html")')
+        && vercelOutputScript.includes("readFileSync"),
+    "Vercel output script should copy assets, remove PHP entrypoints, and reuse the public Vue HTML shell"
 );
 
 assert(
