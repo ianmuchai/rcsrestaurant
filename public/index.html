@@ -13,7 +13,6 @@
     <meta name="author" content="RC's">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="/">
-    <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/images/pwa/icon-192.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="/themes/default/fonts/fontawesome/fontawesome.css">
@@ -39,12 +38,5 @@
     <script src="/themes/default/js/customScript.js"></script>
     <script src="/themes/default/js/tabs.js"></script>
     <script src="/themes/default/js/dropdown.js"></script>
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", function () {
-                navigator.serviceWorker.register("/sw.js").catch(function () {});
-            });
-        }
-    </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ const navbarPath = path.join(root, "resources/js/components/layouts/frontend/Fro
 const cssPath = path.join(root, "resources/css/app.css");
 const manifestPath = path.join(root, "public/manifest.webmanifest");
 const swPath = path.join(root, "public/sw.js");
+const publicIndexPath = path.join(root, "public/index.html");
 
 assert(fs.existsSync(componentPath), "PWA install component should exist");
 
@@ -56,8 +57,18 @@ const navbarSource = fs.readFileSync(navbarPath, "utf8");
 assert(
     navbarSource.includes("frontend.installApp")
         && navbarSource.includes("openPwaInstall")
+        && navbarSource.includes("preparePwaInstall")
+        && navbarSource.includes("ensurePwaManifest")
+        && navbarSource.includes("registerPwaServiceWorker")
         && navbarSource.includes("data-rcs-action=\"pwa_install_link\""),
     "Top-left PWA button should route users to the QR-friendly install page when needed"
+);
+
+const publicIndexSource = fs.readFileSync(publicIndexPath, "utf8");
+assert(
+    !publicIndexSource.includes('<link rel="manifest" href="/manifest.webmanifest">')
+        && !publicIndexSource.includes("navigator.serviceWorker.register"),
+    "Static Vercel homepage shell should not activate PWA install behavior before the user clicks Download"
 );
 
 const cssSource = fs.readFileSync(cssPath, "utf8");

@@ -82,13 +82,13 @@ assert(
 );
 
 assert(
-    masterSource.includes('<link rel="manifest" href="{{ asset(\'manifest.webmanifest\') }}">')
+    !masterSource.includes('<link rel="manifest" href="{{ asset(\'manifest.webmanifest\') }}">')
         && masterSource.includes('<meta name="theme-color" content="#00A800">')
         && masterSource.includes('<meta name="mobile-web-app-capable" content="yes">')
         && masterSource.includes('<meta name="apple-mobile-web-app-capable" content="yes">')
         && masterSource.includes('<link rel="apple-touch-icon" href="{{ asset(\'images/pwa/icon-192.png\') }}">')
-        && masterSource.includes("navigator.serviceWorker.register(\"{{ asset('sw.js') }}\")"),
-    "Master Blade template should expose PWA install metadata and register the service worker"
+        && !masterSource.includes("navigator.serviceWorker.register(\"{{ asset('sw.js') }}\")"),
+    "Master Blade template should not load the PWA manifest or service worker until the user clicks Download"
 );
 
 assert(fs.existsSync(manifestPath), "PWA manifest should exist");
@@ -126,6 +126,9 @@ assert(fs.existsSync(icon512Path), "512px PWA icon should exist");
 
 assert(
     navbarSource.includes("installPrompt")
+        && navbarSource.includes("preparePwaInstall")
+        && navbarSource.includes("ensurePwaManifest")
+        && navbarSource.includes("registerPwaServiceWorker")
         && navbarSource.includes("beforeinstallprompt")
         && navbarSource.includes("prompt()")
         && navbarSource.includes("userChoice")

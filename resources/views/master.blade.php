@@ -10,7 +10,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="RC's">
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/pwa/icon-192.png') }}">
 
     @php
@@ -278,13 +277,6 @@
     <script src="{{ asset('themes/default/js/customScript.js') }}"></script>
     <script src="{{ asset('themes/default/js/tabs.js') }}"></script>
     <script src="{{ asset('themes/default/js/dropdown.js') }}"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register("{{ asset('sw.js') }}").catch(function () {});
-            });
-        }
-    </script>
 </body>
 
 </html>

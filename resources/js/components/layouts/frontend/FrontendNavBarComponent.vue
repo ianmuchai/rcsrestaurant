@@ -285,6 +285,7 @@ export default {
             isPwaInstallAvailable: false,
             isPwaInstalled: false,
             isPwaDialogOpen: false,
+            pwaInstallPrepared: false,
 
         }
     },
@@ -355,8 +356,6 @@ export default {
 
         this.currentRoute = this.$route.path;
         this.syncPwaInstalledState();
-        window.addEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
-        window.addEventListener("appinstalled", this.handleAppInstalled);
         this.loading.isActive = true;
         this.orderPermissionCheck();
         this.$store.dispatch('frontendSetting/lists').then(res => {
@@ -475,7 +474,36 @@ export default {
                 this.isPwaInstallAvailable = false;
             }
         },
+        preparePwaInstall() {
+            if (this.pwaInstallPrepared) {
+                return;
+            }
+
+            this.pwaInstallPrepared = true;
+            this.ensurePwaManifest();
+            window.addEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
+            window.addEventListener("appinstalled", this.handleAppInstalled);
+            this.registerPwaServiceWorker();
+        },
+        ensurePwaManifest() {
+            if (document.querySelector('link[rel="manifest"]')) {
+                return;
+            }
+
+            const manifest = document.createElement("link");
+            manifest.rel = "manifest";
+            manifest.href = "/manifest.webmanifest";
+            document.head.appendChild(manifest);
+        },
+        registerPwaServiceWorker() {
+            if (!("serviceWorker" in navigator)) {
+                return;
+            }
+
+            navigator.serviceWorker.register("/sw.js").catch(() => {});
+        },
         openPwaInstall() {
+            this.preparePwaInstall();
             this.showPwaDialog();
         },
         showPwaDialog() {
@@ -487,6 +515,8 @@ export default {
             document.body.style.overflowY = "auto";
         },
         async confirmPwaInstall() {
+            this.preparePwaInstall();
+
             if (this.installPrompt && !this.isPwaInstalled) {
                 await this.installPwaApp();
                 this.closePwaDialog();

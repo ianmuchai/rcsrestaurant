@@ -91,6 +91,8 @@ export default {
     },
     mounted() {
         this.origin = window.location.origin;
+        this.ensurePwaManifest();
+        this.registerPwaServiceWorker();
         this.syncInstalledState();
         window.addEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
         window.addEventListener("appinstalled", this.handleAppInstalled);
@@ -115,6 +117,23 @@ export default {
             this.installPrompt = null;
             this.isInstalled = true;
             this.copyStatus = "RC's is installed on this device.";
+        },
+        ensurePwaManifest() {
+            if (document.querySelector('link[rel="manifest"]')) {
+                return;
+            }
+
+            const manifest = document.createElement("link");
+            manifest.rel = "manifest";
+            manifest.href = "/manifest.webmanifest";
+            document.head.appendChild(manifest);
+        },
+        registerPwaServiceWorker() {
+            if (!("serviceWorker" in navigator)) {
+                return;
+            }
+
+            navigator.serviceWorker.register("/sw.js").catch(() => {});
         },
         async nativeInstall() {
             if (this.isInstalled) {
