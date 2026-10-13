@@ -146,18 +146,18 @@ assert(
 
 assert(
     cssSource.includes(".rcs-hero-centered-logo img")
-        && cssSource.includes("width: 190px")
-        && cssSource.includes("height: 190px")
+        && cssSource.includes("width: 150px")
+        && cssSource.includes("height: 150px")
         && cssSource.includes("background: transparent")
         && cssSource.includes("border: 0")
         && cssSource.includes("box-shadow: none")
         && cssSource.includes("backdrop-filter: none")
         && cssSource.includes("overflow: visible")
-        && cssSource.includes("max-width: 190px")
-        && cssSource.includes("max-height: 190px")
-        && cssSource.includes("scale(2.8)")
+        && cssSource.includes("max-width: 150px")
+        && cssSource.includes("max-height: 150px")
+        && cssSource.includes("scale(1.85)")
         && !cssSource.includes(".rcs-video-fallback-image"),
-    "Hero logo should render plain at a smaller approved-review size, with no image fallback styling in the hero"
+    "Hero logo should render plain at a smaller balanced size, with no image fallback styling in the hero"
 );
 
 assert(
@@ -242,12 +242,12 @@ assert(
         && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")
         && !cssSource.includes("background: linear-gradient(135deg, #53ab43, #fbb13c)")
         && cssSource.includes(".rcs-floating-actions")
-        && cssSource.includes("left: 18px")
-        && cssSource.includes("bottom: 28px")
-        && cssSource.includes("flex-direction: row")
+        && cssSource.includes("right: 18px")
+        && cssSource.includes("bottom: 124px")
+        && cssSource.includes("flex-direction: column")
         && cssSource.includes("transform: none")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the centered hero logo/order button, fixed orange menu button, and moved contact icons"
+    "CSS should style the smaller centered hero logo/order button, fixed orange menu button, and lower-right vertical contact icons"
 );
 
 console.log("RC's home video hero contract passed");

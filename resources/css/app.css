@@ -1405,8 +1405,8 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 190px;
-    height: 190px;
+    width: 150px;
+    height: 150px;
     margin-left: auto;
     margin-right: auto;
     padding: 0;
@@ -1421,10 +1421,10 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 .rcs-hero-centered-logo img {
     width: 100%;
     height: 100%;
-    max-width: 190px;
-    max-height: 190px;
+    max-width: 150px;
+    max-height: 150px;
     object-fit: contain;
-    transform: scale(2.8);
+    transform: scale(1.85);
     transform-origin: center;
 }
 
@@ -1463,13 +1463,13 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 
 .rcs-floating-actions {
     position: fixed;
-    left: 18px;
-    right: auto;
+    right: 18px;
+    left: auto;
     top: auto;
-    bottom: 28px;
+    bottom: 124px;
     z-index: 55;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 12px;
     transform: none;
 }
@@ -1495,7 +1495,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 }
 
 .rcs-floating-action:hover {
-    transform: translateY(-4px) scale(1.04);
+    transform: translateX(-4px) scale(1.04);
     color: #ffffff;
 }
 
@@ -1513,9 +1513,9 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 
 .rcs-floating-action-label {
     position: absolute;
-    left: 50%;
-    right: auto;
-    top: -42px;
+    right: 62px;
+    left: auto;
+    top: 50%;
     max-width: 140px;
     border-radius: 999px;
     padding: 8px 12px;
@@ -1527,27 +1527,27 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, 8px);
+    transform: translate(8px, -50%);
     transition: opacity 180ms ease, transform 180ms ease;
 }
 
 .rcs-floating-action:hover .rcs-floating-action-label,
 .rcs-floating-action:focus-visible .rcs-floating-action-label {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(0, -50%);
 }
 
 @media (max-width: 767px) {
     .rcs-hero-centered-logo {
-        width: 132px;
-        height: 132px;
+        width: 108px;
+        height: 108px;
         padding: 0;
     }
 
     .rcs-hero-centered-logo img {
-        max-width: 132px;
-        max-height: 132px;
-        transform: scale(2.35);
+        max-width: 108px;
+        max-height: 108px;
+        transform: scale(1.7);
     }
 
     .rcs-hero-order-button {
@@ -1565,10 +1565,10 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     }
 
     .rcs-floating-actions {
-        left: 12px;
-        right: auto;
+        right: 12px;
+        left: auto;
         top: auto;
-        bottom: 92px;
+        bottom: 148px;
         transform: none;
         gap: 10px;
     }
