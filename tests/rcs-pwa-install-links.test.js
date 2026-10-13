@@ -71,7 +71,7 @@ assert(
 );
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-assert.strictEqual(manifest.start_url, "/install-app", "PWA should start on the QR-friendly install page");
+assert.strictEqual(manifest.start_url, "/", "PWA should start on the website homepage, not an install/download page");
 
 const serviceWorkerSource = fs.readFileSync(swPath, "utf8");
 assert(

@@ -96,7 +96,7 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
 assert.strictEqual(manifest.name, "RC's Restaurant");
 assert.strictEqual(manifest.short_name, "RC's");
-assert.strictEqual(manifest.start_url, "/install-app");
+assert.strictEqual(manifest.start_url, "/");
 assert.strictEqual(manifest.scope, "/");
 assert.strictEqual(manifest.display, "standalone");
 assert.strictEqual(manifest.theme_color, "#00A800");
@@ -132,11 +132,22 @@ assert(
         && navbarSource.includes("appinstalled")
         && navbarSource.includes("installPwaApp")
         && navbarSource.includes("openPwaInstall")
+        && navbarSource.includes("isPwaDialogOpen")
+        && navbarSource.includes("showPwaDialog")
+        && navbarSource.includes("closePwaDialog")
+        && navbarSource.includes("confirmPwaInstall")
+        && navbarSource.includes("rcs-pwa-dialog-backdrop")
+        && navbarSource.includes("rcs-pwa-dialog-card")
         && navbarSource.includes("frontend.installApp")
         && navbarSource.includes("rcs-nav-install-button")
         && navbarSource.includes("data-rcs-action=\"pwa_install_link\"")
         && navbarSource.indexOf("rcs-nav-install-button") < navbarSource.indexOf("rcs-main-nav"),
-    "Frontend nav should expose a visible top-left PWA install button wired to install prompt and install page"
+    "Frontend nav should expose a visible top-left PWA install button that opens a branded install dialog"
+);
+
+assert(
+    !navbarSource.includes("await this.installPwaApp();\n                return;"),
+    "Download button should not jump straight to the native browser install dialog"
 );
 
 assert(

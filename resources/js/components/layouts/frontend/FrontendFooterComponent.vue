@@ -1,101 +1,86 @@
 <template>
     <LoadingComponent :props="loading" />
-    <footer class="footer-part pt-12 mb-14 lg:mb-0">
+    <footer class="footer-part rcs-compact-footer">
         <div class="container">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-6">
-                <div>
+            <div class="rcs-footer-grid">
+                <div class="rcs-footer-brand">
                     <router-link :to="{ name: 'frontend.home' }">
-                        <img class="mb-8 w-36" :src="setting.theme_footer_logo" alt="logo">
+                        <img class="rcs-footer-logo" :src="setting.theme_footer_logo" alt="logo">
                     </router-link>
-                    <p class="text-xs mb-3 text-white">{{ $t('label.subscribe_short_text') }}</p>
+                    <p>{{ $t('label.subscribe_short_text') }}</p>
                     <form @submit.prevent="saveSubscription"
-                        class="flex items-center rounded-lg sm:max-w-xs w-full h-12 p-2 mb-8 bg-white">
+                        class="rcs-footer-subscribe">
                         <input type="email" :placeholder="$t('label.your_email_address')"
-                            v-model="subscriptionProps.post.email" class="w-full h-full ltr:pl-2 rtl:pr-2">
-                        <button type="submit"
-                            class="capitalize text-xs font-medium rounded-md flex-shrink-0 p-2.5 text-white bg-primary">
+                            v-model="subscriptionProps.post.email">
+                        <button type="submit">
                             {{ $t('button.subscribe') }}
                         </button>
                     </form>
-                    <h3 v-if="setting.social_media_facebook || setting.social_media_twitter || setting.social_media_instagram || setting.social_media_youtube"
-                        class="text-xs capitalize mb-4 text-white">{{ $t('label.follow_us_on') }}</h3>
                     <nav v-if="setting.social_media_facebook || setting.social_media_twitter || setting.social_media_instagram || setting.social_media_youtube"
-                        class="flex items-center gap-5">
+                        class="rcs-footer-social" :aria-label="$t('label.follow_us_on')">
                         <a v-if="setting.social_media_facebook" target="_blank" :href="setting.social_media_facebook"
-                            class="fa-brands fa-facebook-f inline-block text-sm w-7 h-7 leading-7 text-center rounded-full shadow-lg bg-white text-primary"></a>
+                            class="fa-brands fa-facebook-f"></a>
                         <a v-if="setting.social_media_twitter" target="_blank" :href="setting.social_media_twitter"
-                            class="fa-brands fa-x-twitter inline-block text-sm w-7 h-7 leading-7 text-center rounded-full shadow-lg bg-white text-primary"></a>
+                            class="fa-brands fa-x-twitter"></a>
                         <a v-if="setting.social_media_instagram" target="_blank" :href="setting.social_media_instagram"
-                            class="fa-brands fa-instagram inline-block text-sm w-7 h-7 leading-7 text-center rounded-full shadow-lg bg-white text-primary"></a>
+                            class="fa-brands fa-instagram"></a>
                         <a v-if="setting.social_media_youtube" target="_blank" :href="setting.social_media_youtube"
-                            class="fa-brands fa-youtube inline-block text-sm w-7 h-7 leading-7 text-center rounded-full shadow-lg bg-white text-primary"></a>
+                            class="fa-brands fa-youtube"></a>
                     </nav>
                 </div>
                 <div>
-                    <div class="sm:w-fit sm:mx-auto">
-                        <h3 class="capitalize text-lg font-semibold mb-6 text-white">{{ $t('label.useful_links') }}</h3>
-                        <nav v-if="pages.length > 0" class="flex flex-col items-start gap-3">
-                            <router-link v-for="page in pages" class="capitalize text-white hover:underline"
-                                :to="{ name: 'frontend.page', params: { slug: page.slug } }">
-                                {{ page.title }}
-                            </router-link>
-                        </nav>
-                    </div>
+                    <h3>{{ $t('label.useful_links') }}</h3>
+                    <nav v-if="pages.length > 0" class="rcs-footer-links">
+                        <router-link v-for="page in pages" :key="page.id || page.slug"
+                            :to="{ name: 'frontend.page', params: { slug: page.slug } }">
+                            {{ page.title }}
+                        </router-link>
+                    </nav>
                 </div>
                 <div>
-                    <h3 class="capitalize text-lg font-semibold mb-4 text-white">Visit RC's</h3>
-                    <ul class="mb-7 flex flex-col gap-4">
+                    <h3>Visit RC's</h3>
+                    <ul class="rcs-footer-contact-list">
                         <li class="rcs-footer-detail-link">
-                            <i class="fa-solid fa-location-dot mt-1 text-sm"></i>
+                            <i class="fa-solid fa-location-dot"></i>
                             <span>Moon Palace Hotel, General Waruingi Rd, Nairobi</span>
                         </li>
                         <li>
                             <a href="tel:+254712878787" data-rcs-action="call_click" class="rcs-footer-detail-link">
-                                <i class="fa-solid fa-phone mt-1 text-sm"></i>
+                                <i class="fa-solid fa-phone"></i>
                                 <span>0712 878787</span>
                             </a>
                         </li>
                         <li>
                             <a href="mailto:info@rcs.co.ke" class="rcs-footer-detail-link">
-                                <i class="fa-solid fa-envelope mt-1 text-sm"></i>
+                                <i class="fa-solid fa-envelope"></i>
                                 <span>info@rcs.co.ke</span>
                             </a>
                         </li>
                         <li>
                             <a href="https://www.google.com/maps/search/?api=1&amp;query=RC%27s%20Moon%20Palace%20Hotel%20General%20Waruingi%20Rd%20Nairobi"
                                 target="_blank" rel="noopener" data-rcs-action="directions_click" class="rcs-footer-detail-link">
-                                <i class="fa-solid fa-diamond-turn-right mt-1 text-sm"></i>
+                                <i class="fa-solid fa-diamond-turn-right"></i>
                                 <span>Get directions</span>
                             </a>
                         </li>
                     </ul>
                     <h3 v-if="setting.site_android_app_link || setting.site_ios_app_link"
-                        class="capitalize text-lg font-semibold mb-3 text-white">
+                        class="rcs-footer-app-title">
                         {{ $t('label.download_our_apps') }}
                     </h3>
-                    <nav class="flex items-center gap-3 mb-7 w-full max-w-[265px]">
+                    <nav class="rcs-footer-store-links">
                         <a target="_blank" v-if="setting.site_android_app_link" :href="setting.site_android_app_link">
-                            <img class="rounded-lg w-full" :src="setting.image_play_store" alt="app">
+                            <img :src="setting.image_play_store" alt="app">
                         </a>
                         <a target="_blank" v-if="setting.site_ios_app_link" :href="setting.site_ios_app_link">
-                            <img class="rounded-lg w-full" :src="setting.image_app_store" alt="app">
+                            <img :src="setting.image_app_store" alt="app">
                         </a>
                     </nav>
-                    <ul class="flex flex-col gap-5">
-                        <li class="flex items-center gap-2.5 text-white">
-                            <i class="lab lab-sms-tracking lab-font-size-24"></i>
-                            <span class="text-lg">{{ setting.company_email }}</span>
-                        </li>
-                        <li class="flex items-center gap-2.5 text-white">
-                            <i class="lab lab-call-center lab-font-size-24"></i>
-                            <span class="text-lg font-medium">{{ setting.company_phone }}</span>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
-        <div class="py-8 mt-8 border-t border-[#ff3388]">
-            <p class="text-sm text-center text-white">{{ setting.site_copyright }}</p>
+        <div class="rcs-footer-bottom">
+            <p>{{ setting.site_copyright }}</p>
         </div>
     </footer>
 </template>

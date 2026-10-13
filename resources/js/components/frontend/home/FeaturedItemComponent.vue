@@ -4,13 +4,9 @@
         <div class="container rcs-featured-shell">
             <div class="rcs-featured-glass-panel">
                 <div class="rcs-featured-heading">
-                    <div>
-                        <span class="rcs-featured-kicker">RC's picks</span>
-                        <h2 class="rcs-featured-title">
-                            {{ $t('label.featured_items') }}
-                        </h2>
-                        <p class="rcs-featured-subtitle">Fresh picks from the RC's kitchen</p>
-                    </div>
+                    <h2 class="text-2xl font-semibold capitalize rcs-featured-title">
+                        {{ $t('label.featured_items') }}
+                    </h2>
                 </div>
                 <div class="rcs-featured-items-grid">
                     <ItemComponent :items="featuredItems" :type="itemProps.type" :design="itemProps.design" />

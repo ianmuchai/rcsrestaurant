@@ -26,11 +26,14 @@ assert(
         && source.includes("rcs-featured-glass-panel")
         && source.includes("rcs-featured-heading")
         && source.includes("rcs-featured-title")
-        && source.includes("rcs-featured-kicker")
-        && source.includes("rcs-featured-subtitle")
+        && source.includes("text-2xl")
+        && source.includes("font-semibold")
+        && source.includes("capitalize")
+        && !source.includes("rcs-featured-kicker")
+        && !source.includes("rcs-featured-subtitle")
         && source.includes("rcs-featured-items-grid")
         && !source.includes("rcs-featured-title-mark"),
-    "Featured section should expose scoped structure classes without a decorative title icon"
+    "Featured section should expose scoped structure classes with popular-heading typography and no title clutter"
 );
 
 assert(
@@ -40,7 +43,7 @@ assert(
 
 const cssSource = fs.readFileSync(cssPath, "utf8");
 const featuredCssStart = cssSource.indexOf(".rcs-featured-glass-section");
-const featuredCssEnd = cssSource.indexOf(".rcs-video-band", featuredCssStart);
+const featuredCssEnd = cssSource.indexOf(".rcs-pwa-install-page", featuredCssStart);
 const featuredCss = cssSource.slice(featuredCssStart, featuredCssEnd);
 
 assert(
@@ -70,17 +73,19 @@ assert(
 );
 
 assert(
-    cssSource.includes(".rcs-featured-title")
-        && cssSource.includes(".rcs-featured-kicker")
-        && cssSource.includes(".rcs-featured-subtitle")
+    featuredCss.includes(".rcs-featured-title")
+        && !featuredCss.includes(".rcs-featured-kicker")
+        && !featuredCss.includes(".rcs-featured-subtitle")
         && !cssSource.includes(".rcs-featured-title-mark")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-image")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-cart-btn")
-        && cssSource.includes('font-family: "Georgia", "Times New Roman", "Public Sans", serif')
-        && cssSource.includes("font-size: clamp(28px, 3vw, 40px)")
-        && cssSource.includes("line-height: 1.08")
-        && cssSource.includes("letter-spacing: 0")
+        && featuredCss.includes('font-family: "Public Sans", "Rubik", sans-serif')
+        && featuredCss.includes("font-size: 24px")
+        && featuredCss.includes("font-weight: 600")
+        && featuredCss.includes("line-height: 1.3")
+        && featuredCss.includes("letter-spacing: 0")
+        && !featuredCss.includes('font-family: "Georgia", "Times New Roman", "Public Sans", serif')
         && cssSource.includes("background: rgba(255, 255, 255, 0.92)")
         && cssSource.includes("transform: translateY(-6px)")
         && cssSource.includes("font-size: 15px")

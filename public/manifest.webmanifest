@@ -2,7 +2,7 @@
     "name": "RC's Restaurant",
     "short_name": "RC's",
     "description": "Order from RC's Restaurant in Nairobi and Eastleigh.",
-    "start_url": "/install-app",
+    "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait-primary",

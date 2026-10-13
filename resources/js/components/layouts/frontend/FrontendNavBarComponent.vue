@@ -177,6 +177,37 @@
         </div>
     </div>
 
+    <div v-if="isPwaDialogOpen" class="rcs-pwa-dialog-backdrop" role="dialog" aria-modal="true"
+        aria-labelledby="rcs-pwa-dialog-title">
+        <div class="rcs-pwa-dialog-card">
+            <button type="button" class="rcs-pwa-dialog-close" aria-label="Close download app dialog"
+                @click="closePwaDialog">
+                <i class="fa-regular fa-circle-xmark"></i>
+            </button>
+            <div class="rcs-pwa-dialog-icon">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <span class="rcs-pwa-dialog-kicker">RC's on your device</span>
+            <h3 id="rcs-pwa-dialog-title">Download the RC's app</h3>
+            <p>
+                Add RC's to your home screen for faster ordering, menu access, and a smoother restaurant experience.
+            </p>
+            <div class="rcs-pwa-dialog-actions">
+                <button type="button" class="rcs-pwa-dialog-primary" :disabled="isPwaInstalled"
+                    @click="confirmPwaInstall">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                    <span>{{ isPwaInstalled ? "Installed" : "Install App" }}</span>
+                </button>
+                <router-link :to="{ name: 'frontend.installApp' }" class="rcs-pwa-dialog-secondary"
+                    @click="closePwaDialog">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>QR Link</span>
+                </router-link>
+            </div>
+            <small>Chrome may show one final confirmation after this branded step.</small>
+        </div>
+    </div>
+
     <div id="order" v-if="orderNotificationStatus" ref="orderNotificationModal" class="modal active ff-modal">
         <div class="modal-dialog max-w-[360px] p-6 text-center relative">
             <button @click.prevent="closeOrderNotificationModal" class="modal-close absolute top-4 right-4">
@@ -253,6 +284,7 @@ export default {
             installPrompt: null,
             isPwaInstallAvailable: false,
             isPwaInstalled: false,
+            isPwaDialogOpen: false,
 
         }
     },
@@ -443,13 +475,26 @@ export default {
                 this.isPwaInstallAvailable = false;
             }
         },
-        async openPwaInstall() {
+        openPwaInstall() {
+            this.showPwaDialog();
+        },
+        showPwaDialog() {
+            this.isPwaDialogOpen = true;
+            document.body.style.overflowY = "hidden";
+        },
+        closePwaDialog() {
+            this.isPwaDialogOpen = false;
+            document.body.style.overflowY = "auto";
+        },
+        async confirmPwaInstall() {
             if (this.installPrompt && !this.isPwaInstalled) {
                 await this.installPwaApp();
+                this.closePwaDialog();
                 return;
             }
 
             this.$router.push({ name: "frontend.installApp" });
+            this.closePwaDialog();
         },
         textShortener: function (text, number = 30) {
             return appService.textShortener(text, number);
