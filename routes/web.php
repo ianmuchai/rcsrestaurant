@@ -16,52 +16,6 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-use Illuminate\Support\Facades\Artisan;
-
-Route::get('/cronttt', function () {
-//     // Define the endpoint URL
-// $url = 'https://portal.afrismashtech.co.ke';
-
-// // Set up the query parameters (if any)
-// $params = [
-   
-// ];
-
-// // Build the full URL with query string
-// $urlWithQuery = $url . '?' . http_build_query($params);
-
-// // Initialize cURL
-// $ch = curl_init();
-
-// // Set cURL options
-// curl_setopt($ch, CURLOPT_URL, $urlWithQuery);
-// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-// curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout in seconds
-
-// // Execute cURL request
-// $response = curl_exec($ch);
-
-// // Check for cURL errors
-// if (curl_errno($ch)) {
-//     $error = curl_error($ch);
-//     echo "cURL error: $error";
-   
-// } else {
-//     echo "Response: $response";
-   
-// }
-
-// // Close cURL
-// curl_close($ch);
-
-     Artisan::call('storage:link');
-//   $response = Http::retry(3, 2000)
-//                     ->timeout(30)
-//                     ->get('https://portal.afrismashtech.co.ke/send-message', [
-//                     ]);
- return 'Investment Creation Happened';
-});
-
 
 Route::prefix('install')->name('installer.')->middleware(['web'])->group(function () {
     Route::get('/', [InstallerController::class, 'index'])->name('index');

@@ -170,7 +170,7 @@ Route::prefix('profile')->name('profile.')->middleware(['installed', 'apiKey', '
     Route::post('/change-image', [ProfileController::class, 'changeImage']);
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['installed', 'apiKey', 'localization'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['installed', 'apiKey', 'auth:sanctum', 'localization'])->group(function () {
 
     Route::prefix('sms')->middleware(['auth'])->group(function () {
         Route::get('/', [SmsController::class, 'index']);

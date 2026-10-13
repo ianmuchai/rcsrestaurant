@@ -1,6 +1,7 @@
 const CACHE_NAME = "rcs-pwa-v1";
 const APP_ASSETS = [
     "/manifest.webmanifest",
+    "/install-app",
     "/offline.html",
     "/images/pwa/icon-192.png",
     "/images/pwa/icon-512.png"

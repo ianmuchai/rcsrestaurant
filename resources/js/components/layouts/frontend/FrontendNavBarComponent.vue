@@ -2,9 +2,9 @@
     <LoadingComponent :props="loading" />
     <header class="ff-header rcs-glass-header" ref="ffHeader">
         <div class="container rcs-glass-nav-container flex flex-col lg:flex-row items-center justify-between">
-            <button type="button" data-rcs-action="pwa_install_click" class="rcs-nav-install-button"
+            <button type="button" data-rcs-action="pwa_install_link" class="rcs-nav-install-button"
                 :disabled="isPwaInstalled" :aria-label="pwaInstallLabel" :title="pwaInstallLabel"
-                @click="installPwaApp">
+                @click="openPwaInstall">
                 <i class="fa-solid fa-cloud-arrow-down"></i>
                 <span>{{ pwaInstallLabel }}</span>
             </button>
@@ -442,6 +442,14 @@ export default {
             } else {
                 this.isPwaInstallAvailable = false;
             }
+        },
+        async openPwaInstall() {
+            if (this.installPrompt && !this.isPwaInstalled) {
+                await this.installPwaApp();
+                return;
+            }
+
+            this.$router.push({ name: "frontend.installApp" });
         },
         textShortener: function (text, number = 30) {
             return appService.textShortener(text, number);

@@ -96,7 +96,7 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
 assert.strictEqual(manifest.name, "RC's Restaurant");
 assert.strictEqual(manifest.short_name, "RC's");
-assert.strictEqual(manifest.start_url, "/");
+assert.strictEqual(manifest.start_url, "/install-app");
 assert.strictEqual(manifest.scope, "/");
 assert.strictEqual(manifest.display, "standalone");
 assert.strictEqual(manifest.theme_color, "#00A800");
@@ -131,10 +131,12 @@ assert(
         && navbarSource.includes("userChoice")
         && navbarSource.includes("appinstalled")
         && navbarSource.includes("installPwaApp")
+        && navbarSource.includes("openPwaInstall")
+        && navbarSource.includes("frontend.installApp")
         && navbarSource.includes("rcs-nav-install-button")
-        && navbarSource.includes("data-rcs-action=\"pwa_install_click\"")
+        && navbarSource.includes("data-rcs-action=\"pwa_install_link\"")
         && navbarSource.indexOf("rcs-nav-install-button") < navbarSource.indexOf("rcs-main-nav"),
-    "Frontend nav should expose a visible top-left PWA install button wired to the browser install prompt"
+    "Frontend nav should expose a visible top-left PWA install button wired to install prompt and install page"
 );
 
 assert(

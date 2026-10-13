@@ -905,6 +905,206 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     }
 }
 
+.rcs-pwa-install-page {
+    min-height: calc(100vh - 58px);
+    padding: clamp(38px, 7vw, 84px) 0;
+    background: #00A800;
+}
+
+.rcs-pwa-install-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+    gap: clamp(22px, 4vw, 48px);
+    align-items: center;
+    padding: clamp(22px, 4vw, 46px);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 34px 100px rgba(0, 54, 0, 0.26);
+    backdrop-filter: blur(30px) saturate(1.14);
+    -webkit-backdrop-filter: blur(30px) saturate(1.14);
+}
+
+.rcs-pwa-install-copy {
+    color: #ffffff;
+}
+
+.rcs-pwa-install-kicker {
+    display: block;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.rcs-pwa-install-copy h1 {
+    color: #ffffff;
+    font-family: "Georgia", "Times New Roman", "Public Sans", serif;
+    font-size: clamp(34px, 5vw, 64px);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: 0;
+    text-transform: capitalize;
+    text-shadow: 0 12px 28px rgba(0, 54, 0, 0.28);
+}
+
+.rcs-pwa-install-copy p {
+    max-width: 580px;
+    margin-top: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.65;
+}
+
+.rcs-pwa-install-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.rcs-pwa-primary-button,
+.rcs-pwa-secondary-button,
+.rcs-pwa-copy-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.rcs-pwa-primary-button,
+.rcs-pwa-secondary-button {
+    min-height: 46px;
+    padding: 0 18px;
+    font-size: 14px;
+}
+
+.rcs-pwa-primary-button {
+    color: #00A800;
+    background: #ffffff;
+    box-shadow: 0 18px 40px rgba(0, 54, 0, 0.24);
+}
+
+.rcs-pwa-secondary-button {
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rcs-pwa-primary-button:hover,
+.rcs-pwa-secondary-button:hover,
+.rcs-pwa-copy-button:hover {
+    transform: translateY(-2px);
+}
+
+.rcs-pwa-link-stack {
+    display: grid;
+    gap: 14px;
+}
+
+.rcs-pwa-link-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 20px 48px rgba(0, 54, 0, 0.16);
+}
+
+.rcs-pwa-link-card span {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(15, 23, 42, 0.58);
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.rcs-pwa-link-card strong {
+    display: block;
+    color: #0F172A;
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.rcs-pwa-link-card a {
+    display: block;
+    margin-top: 7px;
+    color: #00A800;
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.rcs-pwa-copy-button {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 13px;
+    color: #ffffff;
+    background: #00A800;
+    font-size: 13px;
+    box-shadow: 0 12px 28px rgba(0, 168, 0, 0.22);
+}
+
+.rcs-pwa-copy-status {
+    min-height: 20px;
+    color: rgba(255, 255, 255, 0.88);
+    font-family: "Public Sans", "Rubik", sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .rcs-pwa-install-page {
+        min-height: calc(100vh - 84px);
+        padding: 24px 0 36px;
+    }
+
+    .rcs-pwa-install-hero {
+        grid-template-columns: 1fr;
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .rcs-pwa-install-copy h1 {
+        font-size: 34px;
+    }
+
+    .rcs-pwa-install-copy p {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .rcs-pwa-link-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rcs-pwa-copy-button {
+        width: 100%;
+    }
+}
+
 .rcs-video-band {
     @apply my-8 overflow-hidden border-y border-[#F1F5F9] bg-[#FFFDF8] py-9 sm:my-10 sm:py-12;
 }

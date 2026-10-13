@@ -20,6 +20,12 @@ assert.strictEqual(
 );
 
 assert.strictEqual(
+    packageJson.engines.node,
+    "20.x",
+    "package.json should pin Node 20 for Vercel because Laravel Mix 6 is not reliable on newer local Node runtimes"
+);
+
+assert.strictEqual(
     vercelConfig.buildCommand,
     "npm run production",
     "vercel.json should force Vercel to run the Laravel Mix production build instead of vite build"

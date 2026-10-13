@@ -11,6 +11,7 @@ import AddressComponent from "../../components/frontend/account/address/AddressC
 import ChangePasswordComponent from "../../components/frontend/account/changePassword/ChangePasswordComponent";
 import CheckoutComponent from "../../components/frontend/checkout/CheckoutComponent";
 import SearchItemComponent from "../../components/frontend/search/SearchItemComponent";
+import PwaInstallComponent from "../../components/frontend/pwa/PwaInstallComponent";
 
 export default [
     {
@@ -125,6 +126,15 @@ export default [
         path: "/search",
         component: SearchItemComponent,
         name: "frontend.search",
+        meta: {
+            isFrontend: true,
+            auth: false,
+        },
+    },
+    {
+        path: "/install-app",
+        component: PwaInstallComponent,
+        name: "frontend.installApp",
         meta: {
             isFrontend: true,
             auth: false,
