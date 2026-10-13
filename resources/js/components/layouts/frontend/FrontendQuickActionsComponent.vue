@@ -16,12 +16,6 @@
             <i class="fa-solid fa-location-dot"></i>
             <span class="rcs-floating-action-label">Directions</span>
         </a>
-        <button type="button" data-rcs-action="pwa_install_click"
-            class="rcs-floating-action rcs-floating-action-install" :disabled="isPwaInstalled"
-            :aria-label="pwaInstallLabel" :title="pwaInstallLabel" @click="installPwaApp">
-            <i class="fa-solid fa-cloud-arrow-down"></i>
-            <span class="rcs-floating-action-label">{{ pwaInstallLabel }}</span>
-        </button>
     </div>
 </template>
 
@@ -32,78 +26,12 @@ export default {
         return {
             callUrl: "tel:+254712878787",
             whatsappUrl: "https://wa.me/254712878787",
-            directionsUrl: "https://www.google.com/maps/search/?api=1&query=RC%27s%20Moon%20Palace%20Hotel%20General%20Waruingi%20Rd%20Nairobi",
-            installPrompt: null,
-            isPwaInstallAvailable: false,
-            isPwaInstalled: false
+            directionsUrl: "https://www.google.com/maps/search/?api=1&query=RC%27s%20Moon%20Palace%20Hotel%20General%20Waruingi%20Rd%20Nairobi"
         };
     },
     computed: {
         isFrontendRoute: function () {
             return this.$route.meta.isFrontend === true;
-        },
-        isPwaInstallVisible: function () {
-            return this.isFrontendRoute;
-        },
-        pwaInstallLabel: function () {
-            if (this.isPwaInstalled) {
-                return "App Installed";
-            }
-
-            return this.isPwaInstallAvailable ? "Install App" : "Install App";
-        }
-    },
-    mounted() {
-        this.syncPwaInstalledState();
-
-        if (typeof window !== "undefined") {
-            window.addEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
-            window.addEventListener("appinstalled", this.handleAppInstalled);
-        }
-    },
-    beforeUnmount() {
-        if (typeof window !== "undefined") {
-            window.removeEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
-            window.removeEventListener("appinstalled", this.handleAppInstalled);
-        }
-    },
-    methods: {
-        syncPwaInstalledState() {
-            if (typeof window === "undefined") {
-                return;
-            }
-
-            const standaloneDisplay = window.matchMedia
-                && window.matchMedia("(display-mode: standalone)").matches;
-            const iosStandalone = window.navigator && window.navigator.standalone === true;
-            this.isPwaInstalled = standaloneDisplay || iosStandalone;
-        },
-        handleBeforeInstallPrompt(event) {
-            event.preventDefault();
-            this.installPrompt = event;
-            this.isPwaInstallAvailable = true;
-            this.isPwaInstalled = false;
-        },
-        handleAppInstalled() {
-            this.installPrompt = null;
-            this.isPwaInstallAvailable = false;
-            this.isPwaInstalled = true;
-        },
-        async installPwaApp() {
-            if (this.isPwaInstalled || !this.installPrompt) {
-                return;
-            }
-
-            const promptEvent = this.installPrompt;
-            this.installPrompt = null;
-            await promptEvent.prompt();
-
-            if (promptEvent.userChoice) {
-                const choice = await promptEvent.userChoice;
-                this.isPwaInstallAvailable = choice.outcome !== "accepted";
-            } else {
-                this.isPwaInstallAvailable = false;
-            }
         }
     }
 }

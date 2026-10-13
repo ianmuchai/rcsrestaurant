@@ -125,23 +125,24 @@ assert(fs.existsSync(icon192Path), "192px PWA icon should exist");
 assert(fs.existsSync(icon512Path), "512px PWA icon should exist");
 
 assert(
-    quickActionsSource.includes("installPrompt")
-        && quickActionsSource.includes("beforeinstallprompt")
-        && quickActionsSource.includes("prompt()")
-        && quickActionsSource.includes("userChoice")
-        && quickActionsSource.includes("appinstalled")
-        && quickActionsSource.includes("isPwaInstallVisible")
-        && quickActionsSource.includes("installPwaApp")
-        && quickActionsSource.includes("rcs-floating-action-install")
-        && quickActionsSource.includes("data-rcs-action=\"pwa_install_click\""),
-    "Frontend quick actions should expose a visible PWA install button wired to the browser install prompt"
+    navbarSource.includes("installPrompt")
+        && navbarSource.includes("beforeinstallprompt")
+        && navbarSource.includes("prompt()")
+        && navbarSource.includes("userChoice")
+        && navbarSource.includes("appinstalled")
+        && navbarSource.includes("installPwaApp")
+        && navbarSource.includes("rcs-nav-install-button")
+        && navbarSource.includes("data-rcs-action=\"pwa_install_click\"")
+        && navbarSource.indexOf("rcs-nav-install-button") < navbarSource.indexOf("rcs-main-nav"),
+    "Frontend nav should expose a visible top-left PWA install button wired to the browser install prompt"
 );
 
 assert(
-    cssSource.includes(".rcs-floating-action-install")
+    cssSource.includes(".rcs-nav-install-button")
         && cssSource.includes("background: #00A800")
-        && cssSource.includes(".rcs-floating-action-install[disabled]"),
-    "PWA install button should be styled as a clear green floating action with a disabled installed state"
+        && cssSource.includes(".rcs-nav-install-button[disabled]")
+        && !cssSource.includes(".rcs-floating-action-install"),
+    "PWA install button should be styled as a clear green top-bar action with no floating install icon"
 );
 
 console.log("RC's PWA and glass nav contract passed");

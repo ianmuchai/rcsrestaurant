@@ -26,9 +26,11 @@ assert(
         && source.includes("rcs-featured-glass-panel")
         && source.includes("rcs-featured-heading")
         && source.includes("rcs-featured-title")
+        && source.includes("rcs-featured-kicker")
         && source.includes("rcs-featured-title-mark")
+        && source.includes("rcs-featured-subtitle")
         && source.includes("rcs-featured-items-grid"),
-    "Featured section should expose scoped structure classes for the glossy green glass redesign"
+    "Featured section should expose scoped structure classes for the improved glossy green UI"
 );
 
 assert(
@@ -45,12 +47,9 @@ assert(
     cssSource.includes(".rcs-featured-glass-section")
         && cssSource.includes("background-color: #00A800")
         && cssSource.includes("background: #00A800")
-        && cssSource.includes(".rcs-featured-glass-section::before")
-        && cssSource.includes(".rcs-featured-glass-section::after")
-        && cssSource.includes("filter: blur(1px)")
-        && cssSource.includes("mix-blend-mode: screen")
-        && cssSource.includes("box-shadow: inset"),
-    "Featured section background should be glossy green without rainbow or multi-color gradients"
+        && !cssSource.includes(".rcs-featured-glass-section::before")
+        && !cssSource.includes(".rcs-featured-glass-section::after"),
+    "Featured section background should be a standard unaltered green"
 );
 
 assert(
@@ -61,24 +60,28 @@ assert(
 
 assert(
     cssSource.includes(".rcs-featured-glass-panel")
-        && cssSource.includes("background: rgba(255, 255, 255, 0.18)")
-        && cssSource.includes("backdrop-filter: blur(18px)")
-        && cssSource.includes("-webkit-backdrop-filter: blur(18px)")
-        && cssSource.includes("border: 1px solid rgba(255, 255, 255, 0.32)")
-        && cssSource.includes("box-shadow: 0 28px 80px rgba(0, 66, 0, 0.28)"),
-    "Featured section should use a premium glass panel over the green background"
+        && cssSource.includes("background: rgba(255, 255, 255, 0.22)")
+        && cssSource.includes("backdrop-filter: blur(24px)")
+        && cssSource.includes("-webkit-backdrop-filter: blur(24px)")
+        && cssSource.includes("border: 1px solid rgba(255, 255, 255, 0.42)")
+        && cssSource.includes("box-shadow: 0 30px 90px rgba(0, 66, 0, 0.26)"),
+    "Featured section should use a more transparent premium glass panel over the standard green background"
 );
 
 assert(
     cssSource.includes(".rcs-featured-title")
+        && cssSource.includes(".rcs-featured-kicker")
+        && cssSource.includes(".rcs-featured-subtitle")
         && cssSource.includes(".rcs-featured-title-mark")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-image")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-cart-btn")
-        && cssSource.includes("rgba(255, 255, 255, 0.92)")
+        && cssSource.includes('font-family: "Public Sans", "Rubik", sans-serif')
+        && cssSource.includes("font-size: clamp(28px, 3vw, 42px)")
+        && cssSource.includes("rgba(255, 255, 255, 0.88)")
         && cssSource.includes("background: #00A800")
         && cssSource.includes("transform: translateY(-3px)"),
-    "Featured section should brighten its title and lift item cards with scoped glossy styling"
+    "Featured section should improve typography, transparency, and card interaction with scoped glossy styling"
 );
 
 assert(

@@ -2,6 +2,13 @@
     <LoadingComponent :props="loading" />
     <header class="ff-header rcs-glass-header" ref="ffHeader">
         <div class="container rcs-glass-nav-container flex flex-col lg:flex-row items-center justify-between">
+            <button type="button" data-rcs-action="pwa_install_click" class="rcs-nav-install-button"
+                :disabled="isPwaInstalled" :aria-label="pwaInstallLabel" :title="pwaInstallLabel"
+                @click="installPwaApp">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+                <span>{{ pwaInstallLabel }}</span>
+            </button>
+
             <nav class="rcs-main-nav items-center justify-center hidden lg:flex">
                 <router-link :to="{ name: 'frontend.home' }"
                     :class="checkIsPathAndRoutePathSame('/') || checkIsPathAndRoutePathSame('/home') ? 'rcs-nav-link-active text-primary' : ''"
@@ -243,6 +250,9 @@ export default {
                 url: ""
             },
             searchItem: "",
+            installPrompt: null,
+            isPwaInstallAvailable: false,
+            isPwaInstalled: false,
 
         }
     },
@@ -273,6 +283,13 @@ export default {
         },
         defaultMenu: function () {
             return this.$store.getters.authDefaultMenu;
+        },
+        pwaInstallLabel: function () {
+            if (this.isPwaInstalled) {
+                return "Installed";
+            }
+
+            return "Download";
         }
     },
     mounted() {
@@ -305,6 +322,9 @@ export default {
         });
 
         this.currentRoute = this.$route.path;
+        this.syncPwaInstalledState();
+        window.addEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
+        window.addEventListener("appinstalled", this.handleAppInstalled);
         this.loading.isActive = true;
         this.orderPermissionCheck();
         this.$store.dispatch('frontendSetting/lists').then(res => {
@@ -384,8 +404,45 @@ export default {
             this.loading.isActive = false;
         });
     },
+    beforeUnmount() {
+        window.removeEventListener("beforeinstallprompt", this.handleBeforeInstallPrompt);
+        window.removeEventListener("appinstalled", this.handleAppInstalled);
+    },
 
     methods: {
+        syncPwaInstalledState() {
+            const standaloneDisplay = window.matchMedia
+                && window.matchMedia("(display-mode: standalone)").matches;
+            const iosStandalone = window.navigator && window.navigator.standalone === true;
+            this.isPwaInstalled = standaloneDisplay || iosStandalone;
+        },
+        handleBeforeInstallPrompt(event) {
+            event.preventDefault();
+            this.installPrompt = event;
+            this.isPwaInstallAvailable = true;
+            this.isPwaInstalled = false;
+        },
+        handleAppInstalled() {
+            this.installPrompt = null;
+            this.isPwaInstallAvailable = false;
+            this.isPwaInstalled = true;
+        },
+        async installPwaApp() {
+            if (this.isPwaInstalled || !this.installPrompt) {
+                return;
+            }
+
+            const promptEvent = this.installPrompt;
+            this.installPrompt = null;
+            await promptEvent.prompt();
+
+            if (promptEvent.userChoice) {
+                const choice = await promptEvent.userChoice;
+                this.isPwaInstallAvailable = choice.outcome !== "accepted";
+            } else {
+                this.isPwaInstallAvailable = false;
+            }
+        },
         textShortener: function (text, number = 30) {
             return appService.textShortener(text, number);
         },

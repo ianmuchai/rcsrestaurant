@@ -93,7 +93,7 @@ assert(
         && sliderSource.includes("data-rcs-action=\"hero_menu_click\"")
         && sliderSource.includes("fa-bowl-food")
         && sliderSource.includes("{{ $t('label.menu') }}"),
-    "Hero should move the Menu action into a square button at the top right of the carousel with a modern food icon"
+    "Hero should keep the Menu action as a modern floating square food button"
 );
 
 assert(
@@ -189,18 +189,17 @@ assert(
         && quickActionsSource.includes("tel:+254712878787")
         && quickActionsSource.includes("directionsUrl")
         && quickActionsSource.includes("fa-location-dot")
-        && quickActionsSource.includes("installPrompt")
-        && quickActionsSource.includes("beforeinstallprompt")
-        && quickActionsSource.includes("rcs-floating-action-install")
-        && quickActionsSource.includes("data-rcs-action=\"pwa_install_click\"")
-        && quickActionsSource.includes("fa-cloud-arrow-down")
         && !quickActionsSource.includes("fa-location-arrow"),
-    "Floating controls should provide modern call, WhatsApp, directions, and PWA install actions"
+    "Floating controls should provide modern call, WhatsApp, and directions actions"
 );
 
 assert(
-    !quickActionsSource.includes("order_click"),
-    "Floating controls should not duplicate the order action"
+    !quickActionsSource.includes("order_click")
+        && !quickActionsSource.includes("pwa_install_click")
+        && !quickActionsSource.includes("rcs-floating-action-install")
+        && !quickActionsSource.includes("installPrompt")
+        && !quickActionsSource.includes("beforeinstallprompt"),
+    "Floating controls should not duplicate order or PWA install actions"
 );
 
 assert(
@@ -221,7 +220,8 @@ assert(
         && cssSource.includes("letter-spacing: 0.01em")
         && cssSource.includes("text-transform: none")
         && cssSource.includes(".rcs-hero-menu-button")
-        && cssSource.includes("top: 20px")
+        && cssSource.includes("position: fixed")
+        && cssSource.includes("top: 74px")
         && cssSource.includes("right: 20px")
         && cssSource.includes("width: 72px")
         && cssSource.includes("background: #F97316")
@@ -229,13 +229,13 @@ assert(
         && cssSource.includes("font-size: 11px")
         && cssSource.includes(".rcs-floating-action-directions")
         && cssSource.includes("background: #E11D48")
-        && cssSource.includes(".rcs-floating-action-install")
         && cssSource.includes(".rcs-floating-action-menu")
+        && !cssSource.includes(".rcs-floating-action-install")
         && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")
         && !cssSource.includes("background: linear-gradient(135deg, #53ab43, #fbb13c)")
         && cssSource.includes(".rcs-floating-actions")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the centered hero logo, orange floating menu button, calmer Order Online button text, and floating contact/install icons"
+    "CSS should style the centered hero logo, fixed orange menu button, calmer Order Online button text, and floating contact icons"
 );
 
 console.log("RC's home video hero contract passed");
