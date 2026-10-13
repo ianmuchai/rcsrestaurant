@@ -7,7 +7,6 @@
                     <div>
                         <span class="rcs-featured-kicker">RC's picks</span>
                         <h2 class="rcs-featured-title">
-                            <span class="rcs-featured-title-mark"></span>
                             {{ $t('label.featured_items') }}
                         </h2>
                         <p class="rcs-featured-subtitle">Fresh picks from the RC's kitchen</p>

@@ -27,10 +27,10 @@ assert(
         && source.includes("rcs-featured-heading")
         && source.includes("rcs-featured-title")
         && source.includes("rcs-featured-kicker")
-        && source.includes("rcs-featured-title-mark")
         && source.includes("rcs-featured-subtitle")
-        && source.includes("rcs-featured-items-grid"),
-    "Featured section should expose scoped structure classes for the improved glossy green UI"
+        && source.includes("rcs-featured-items-grid")
+        && !source.includes("rcs-featured-title-mark"),
+    "Featured section should expose scoped structure classes without a decorative title icon"
 );
 
 assert(
@@ -73,12 +73,13 @@ assert(
     cssSource.includes(".rcs-featured-title")
         && cssSource.includes(".rcs-featured-kicker")
         && cssSource.includes(".rcs-featured-subtitle")
-        && cssSource.includes(".rcs-featured-title-mark")
+        && !cssSource.includes(".rcs-featured-title-mark")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-image")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-cart-btn")
-        && cssSource.includes('font-family: "Playfair Display", "Fraunces", "Public Sans", serif')
-        && cssSource.includes("font-size: clamp(34px, 4.2vw, 58px)")
+        && cssSource.includes('font-family: "Georgia", "Times New Roman", "Public Sans", serif')
+        && cssSource.includes("font-size: clamp(28px, 3vw, 40px)")
+        && cssSource.includes("line-height: 1.08")
         && cssSource.includes("letter-spacing: 0")
         && cssSource.includes("background: rgba(255, 255, 255, 0.92)")
         && cssSource.includes("transform: translateY(-6px)")

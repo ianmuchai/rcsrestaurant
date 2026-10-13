@@ -146,7 +146,7 @@ assert(
 
 assert(
     cssSource.includes(".rcs-hero-centered-logo img")
-        && cssSource.includes("width: clamp(96px, 11vw, 128px)")
+        && cssSource.includes("width: clamp(108px, 12vw, 142px)")
         && cssSource.includes("height: auto")
         && cssSource.includes("background: transparent")
         && cssSource.includes("border: 0")
@@ -158,7 +158,7 @@ assert(
         && !cssSource.includes("scale(1.85)")
         && !cssSource.includes("scale(1.7)")
         && !cssSource.includes(".rcs-video-fallback-image"),
-    "Hero logo should render as a plain current asset without transform scaling that can overlap the Order Online button"
+    "Hero logo should render as a slightly larger plain current asset without transform scaling that can overlap the Order Online button"
 );
 
 assert(
