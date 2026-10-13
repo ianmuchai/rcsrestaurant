@@ -31,27 +31,34 @@ const cssSource = fs.readFileSync(cssPath, "utf8");
 
 assert(
     footerSource.includes("rcs-compact-footer")
-        && footerSource.includes("rcs-footer-grid")
+        && footerSource.includes("rcs-footer-strip")
         && footerSource.includes("rcs-footer-brand")
-        && footerSource.includes("rcs-footer-subscribe")
+        && footerSource.includes("rcs-footer-quicklinks")
+        && footerSource.includes("rcs-footer-actions")
         && footerSource.includes("rcs-footer-social")
         && footerSource.includes("rcs-footer-bottom")
+        && footerSource.includes("footerPages")
+        && !footerSource.includes("rcs-footer-subscribe")
+        && !footerSource.includes("saveSubscription")
+        && !footerSource.includes("download_our_apps")
+        && !footerSource.includes("label.subscribe_short_text")
         && !footerSource.includes("pt-12")
         && !footerSource.includes("py-8 mt-8")
         && !footerSource.includes("mb-14"),
-    "Frontend footer should use a compact redesigned structure instead of tall legacy spacing"
+    "Frontend footer should use a minimal strip structure instead of stacked full-page content"
 );
 
 assert(
     cssSource.includes(".rcs-compact-footer")
-        && cssSource.includes("padding: 28px 0 0")
-        && cssSource.includes(".rcs-footer-grid")
-        && cssSource.includes("gap: 18px")
+        && cssSource.includes("padding: 12px 0 0")
+        && cssSource.includes(".rcs-footer-strip")
+        && cssSource.includes("min-height: 72px")
+        && cssSource.includes("gap: 14px")
         && cssSource.includes(".rcs-footer-bottom")
-        && cssSource.includes("padding: 14px 0")
+        && cssSource.includes("padding: 8px 0")
         && cssSource.includes("border-top: 1px solid rgba(255, 255, 255, 0.18)")
-        && cssSource.includes(".rcs-footer-subscribe"),
-    "Footer CSS should reduce height and use compact modern spacing"
+        && !cssSource.includes(".rcs-footer-subscribe"),
+    "Footer CSS should enforce a slim minimal footer height"
 );
 
 assert(
