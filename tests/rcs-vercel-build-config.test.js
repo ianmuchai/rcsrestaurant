@@ -7,6 +7,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), 
 const vercelPath = path.join(root, "vercel.json");
 const vercelOutputScriptPath = path.join(root, "scripts/prepare-vercel-output.js");
 const publicIndexHtmlPath = path.join(root, "public/index.html");
+const vercelIgnorePath = path.join(root, ".vercelignore");
 
 assert(
     fs.existsSync(vercelPath),
@@ -77,6 +78,22 @@ assert(
 assert(
     fs.existsSync(publicIndexHtmlPath),
     "Public directory should include index.html so Vercel never serves public/index.php as a download"
+);
+
+assert(
+    fs.existsSync(vercelIgnorePath),
+    "Repository should include .vercelignore so Vercel cannot upload Laravel PHP entrypoints"
+);
+
+const vercelIgnore = fs.existsSync(vercelIgnorePath)
+    ? fs.readFileSync(vercelIgnorePath, "utf8")
+    : "";
+
+assert(
+    vercelIgnore.includes("public/index.php")
+        && vercelIgnore.includes("public/.htaccess")
+        && !vercelIgnore.includes("public/index.html"),
+    ".vercelignore should exclude public/index.php while keeping public/index.html deployable"
 );
 
 const publicIndexHtml = fs.existsSync(publicIndexHtmlPath)

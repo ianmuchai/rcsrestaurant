@@ -1,0 +1,6 @@
+public/index.php
+public/.htaccess
+.env
+.env.*
+storage/
+vendor/
