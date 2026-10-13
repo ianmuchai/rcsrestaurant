@@ -20,7 +20,7 @@
         <div class="rcs-hero-brand-overlay">
             <div class="rcs-hero-brand-stack">
                 <router-link :to="{ name: 'frontend.home' }" class="rcs-hero-centered-logo" aria-label="RC's home">
-                    <img class="rcs-hero-logo-image" :src="heroLogoSrc" alt="RC's logo">
+                    <img class="rcs-hero-logo-image" :src="currentHeroLogoSrc" alt="RC's logo">
                 </router-link>
                 <router-link :to="{ name: 'frontend.menu' }" class="rcs-hero-order-button" data-rcs-action="order_click">
                     <i class="fa-solid fa-bag-shopping"></i>
@@ -66,14 +66,6 @@ export default {
         };
     },
     methods: {
-        versionedAsset(src) {
-            if (!src) {
-                return src;
-            }
-
-            const separator = src.includes("?") ? "&" : "?";
-            return `${src}${separator}v=rcs-logo-green-20261013`;
-        },
         playVideo(event) {
             const video = event && event.target;
             if (video && typeof video.play === "function") {
@@ -85,11 +77,8 @@ export default {
         }
     },
     computed: {
-        setting: function () {
-            return this.$store.getters["frontendSetting/lists"];
-        },
-        heroLogoSrc: function () {
-            return this.versionedAsset(this.setting.theme_favicon_logo || this.setting.theme_logo);
+        currentHeroLogoSrc: function () {
+            return "/images/theme/theme-favicon-logo.png?v=rcs-current-logo-20261013";
         }
     }
 };

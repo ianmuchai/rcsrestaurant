@@ -97,14 +97,14 @@ assert(
 );
 
 assert(
-    sliderSource.includes("heroLogoSrc")
-        && sliderSource.includes("setting.theme_favicon_logo")
-        && sliderSource.includes("setting.theme_logo")
-        && sliderSource.includes("rcs-logo-green-20261013")
+    sliderSource.includes("currentHeroLogoSrc")
+        && sliderSource.includes("/images/theme/theme-favicon-logo.png?v=rcs-current-logo-20261013")
+        && !sliderSource.includes("setting.theme_favicon_logo")
+        && !sliderSource.includes("setting.theme_logo")
         && sliderSource.includes("rcs-hero-centered-logo")
         && sliderSource.includes("rcs-hero-brand-stack")
         && sliderSource.indexOf("rcs-hero-centered-logo") < sliderSource.indexOf("rcs-hero-order-button"),
-    "Hero should use the current green cache-busted square RC's logo and stack the Order Online button directly beneath it"
+    "Hero should use the current cache-busted RC's logo asset directly, so stale backend logo settings cannot render the old mark"
 );
 
 assert(
@@ -146,18 +146,19 @@ assert(
 
 assert(
     cssSource.includes(".rcs-hero-centered-logo img")
-        && cssSource.includes("width: 150px")
-        && cssSource.includes("height: 150px")
+        && cssSource.includes("width: clamp(96px, 11vw, 128px)")
+        && cssSource.includes("height: auto")
         && cssSource.includes("background: transparent")
         && cssSource.includes("border: 0")
         && cssSource.includes("box-shadow: none")
         && cssSource.includes("backdrop-filter: none")
-        && cssSource.includes("overflow: visible")
-        && cssSource.includes("max-width: 150px")
-        && cssSource.includes("max-height: 150px")
-        && cssSource.includes("scale(1.85)")
+        && cssSource.includes("overflow: hidden")
+        && cssSource.includes("display: block")
+        && !cssSource.includes(".rcs-hero-centered-logo img {\n    width: 100%;\n    height: 100%;")
+        && !cssSource.includes("scale(1.85)")
+        && !cssSource.includes("scale(1.7)")
         && !cssSource.includes(".rcs-video-fallback-image"),
-    "Hero logo should render plain at a smaller balanced size, with no image fallback styling in the hero"
+    "Hero logo should render as a plain current asset without transform scaling that can overlap the Order Online button"
 );
 
 assert(
