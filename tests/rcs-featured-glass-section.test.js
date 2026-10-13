@@ -60,12 +60,13 @@ assert(
 
 assert(
     cssSource.includes(".rcs-featured-glass-panel")
-        && cssSource.includes("background: rgba(255, 255, 255, 0.22)")
-        && cssSource.includes("backdrop-filter: blur(24px)")
-        && cssSource.includes("-webkit-backdrop-filter: blur(24px)")
-        && cssSource.includes("border: 1px solid rgba(255, 255, 255, 0.42)")
-        && cssSource.includes("box-shadow: 0 30px 90px rgba(0, 66, 0, 0.26)"),
-    "Featured section should use a more transparent premium glass panel over the standard green background"
+        && cssSource.includes("background: rgba(255, 255, 255, 0.18)")
+        && cssSource.includes("backdrop-filter: blur(30px) saturate(1.15)")
+        && cssSource.includes("-webkit-backdrop-filter: blur(30px) saturate(1.15)")
+        && cssSource.includes("border: 1px solid rgba(255, 255, 255, 0.5)")
+        && cssSource.includes("box-shadow: 0 34px 100px rgba(0, 54, 0, 0.28)")
+        && cssSource.includes("border-radius: 18px"),
+    "Featured section should use a cleaner premium glass panel over the standard green background"
 );
 
 assert(
@@ -76,12 +77,15 @@ assert(
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-image")
         && cssSource.includes(".rcs-featured-glass-section .product-card-grid-cart-btn")
-        && cssSource.includes('font-family: "Public Sans", "Rubik", sans-serif')
-        && cssSource.includes("font-size: clamp(28px, 3vw, 42px)")
-        && cssSource.includes("rgba(255, 255, 255, 0.88)")
-        && cssSource.includes("background: #00A800")
-        && cssSource.includes("transform: translateY(-3px)"),
-    "Featured section should improve typography, transparency, and card interaction with scoped glossy styling"
+        && cssSource.includes('font-family: "Playfair Display", "Fraunces", "Public Sans", serif')
+        && cssSource.includes("font-size: clamp(34px, 4.2vw, 58px)")
+        && cssSource.includes("letter-spacing: 0")
+        && cssSource.includes("background: rgba(255, 255, 255, 0.92)")
+        && cssSource.includes("transform: translateY(-6px)")
+        && cssSource.includes("font-size: 15px")
+        && cssSource.includes("font-weight: 900")
+        && cssSource.includes("min-height: 46px"),
+    "Featured section should improve typography, card hierarchy, and interactions with scoped glossy styling"
 );
 
 assert(
