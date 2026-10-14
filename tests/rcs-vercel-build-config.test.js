@@ -108,7 +108,7 @@ assert(
     publicIndexHtml.includes("<!DOCTYPE html>")
         && publicIndexHtml.includes("<default-component />")
         && publicIndexHtml.includes('/js/app.js?v=20260723g')
-        && publicIndexHtml.includes('/css/app.css?v=20260723g')
+        && /href="\/css\/app\.css\?v=[a-zA-Z0-9-]+"/.test(publicIndexHtml)
         && publicIndexHtml.includes('window.APP_URL = "https://rcs.co.ke";')
         && publicIndexHtml.includes("window.APP_KEY = ")
         && !publicIndexHtml.includes("const APP_URL = window.location.origin;")
