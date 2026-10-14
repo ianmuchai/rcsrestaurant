@@ -107,7 +107,7 @@ async function main() {
             assert(dimensions.logo.bottom < dimensions.order.y, 'Logo and order button must have clear separation');
             if (viewport.width < 1024) {
                 assert(dimensions.header.height <= 49, 'Mobile header must be compact');
-                assert.strictEqual(dimensions.headerBackground, 'rgba(255, 255, 255, 0.22)', 'Header should have a transparent glass tint');
+                assert.strictEqual(dimensions.headerBackground, 'rgba(255, 255, 255, 0.45)', 'Header should have a transparent glass tint');
                 assert(dimensions.headerBlur.includes('blur(24px)'), 'Header should blur the video behind it');
                 assert.strictEqual(dimensions.hero.y, 0, 'Video should extend beneath the glass header');
                 assert(dimensions.hero.height >= viewport.height - 50, 'Mobile video hero must remain tall');
