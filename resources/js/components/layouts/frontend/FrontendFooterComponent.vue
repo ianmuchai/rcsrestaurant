@@ -14,6 +14,21 @@
                         {{ page.title }}
                     </router-link>
                 </nav>
+                <div class="rcs-footer-downloads" aria-label="Download RC's app">
+                    <span class="rcs-footer-download-title">Get the RC's app</span>
+                    <div class="rcs-footer-download-buttons">
+                        <router-link :to="{ name: 'frontend.installApp' }" class="rcs-footer-download-button"
+                            data-rcs-action="footer_android_pwa">
+                            <i class="fa-brands fa-android"></i>
+                            <span>Android</span>
+                        </router-link>
+                        <router-link :to="{ name: 'frontend.installApp' }" class="rcs-footer-download-button"
+                            data-rcs-action="footer_ios_pwa">
+                            <i class="fa-brands fa-apple"></i>
+                            <span>iOS</span>
+                        </router-link>
+                    </div>
+                </div>
                 <div class="rcs-footer-actions">
                     <a href="tel:+254712878787" data-rcs-action="call_click" class="rcs-footer-detail-link">
                         <i class="fa-solid fa-phone"></i>

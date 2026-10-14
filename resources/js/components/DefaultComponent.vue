@@ -1,6 +1,6 @@
 <template>
   <div :dir="direction">
-    <div v-if="theme === 'frontend'">
+    <div v-if="theme === 'frontend'" class="rcs-frontend-layout">
       <FrontendNavbarComponent />
       <FrontendCartComponent />
       <router-view></router-view>

@@ -111,7 +111,7 @@ assert(fs.existsSync(serviceWorkerPath), "Service worker should exist");
 const serviceWorkerSource = fs.readFileSync(serviceWorkerPath, "utf8");
 
 assert(
-    serviceWorkerSource.includes("rcs-pwa-v1")
+    /const CACHE_NAME = "rcs-pwa-[^"]+";/.test(serviceWorkerSource)
         && serviceWorkerSource.includes("install")
         && serviceWorkerSource.includes("activate")
         && serviceWorkerSource.includes("fetch")
