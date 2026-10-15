@@ -2,7 +2,7 @@
     <Swiper dir="ltr" :modules="carouselModules" :speed="6500" slidesPerView="auto" :spaceBetween="16"
         :autoplay="categoryAutoplay" :freeMode="categoryFreeMode" :loop="true"
         :loopAdditionalSlides="categoryLoopAdditionalSlides" :allowTouchMove="true" :grabCursor="true"
-        :loopPreventsSliding="false" class="menu-slides">
+        :loopPreventsSliding="false" @touchStart="pauseAutoscroll" @touchEnd="resumeAutoscroll" class="menu-slides">
         <SwiperSlide v-for="(category, index) in carouselCategories"
             :key="`${category.id || category.slug || category.name}-${index}`" class="!w-fit">
             <router-link v-if="design === categoryDesignEnum.FIRST"
@@ -122,6 +122,18 @@ export default {
         }
     },
     methods: {
+        pauseAutoscroll(swiper) {
+            const position = swiper.getTranslate();
+            swiper.autoplay.stop();
+            swiper.setTransition(0);
+            swiper.setTranslate(position);
+            swiper.transitionEnd();
+        },
+        resumeAutoscroll(swiper) {
+            this.$nextTick(() => {
+                if (!swiper.destroyed) swiper.autoplay.start();
+            });
+        },
         submit: function (msg, e) {
             e.stopPropagation()
         },

@@ -77,6 +77,7 @@ class User extends Authenticatable implements HasMedia
      * @var array<int, string>
      */
     protected $hidden = [
+        'google_id',
         'password',
         'remember_token',
     ];

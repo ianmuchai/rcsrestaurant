@@ -6,6 +6,7 @@
                 $t('label.lets_get_started')
                 }}
             </h2>
+            <GoogleAuthComponent />
             <form @submit.prevent="save">
                 <div class="mb-6">
                     <label for="phone" class="text-sm capitalize mb-1 text-heading">
@@ -49,10 +50,11 @@ import appService from "../../../services/appService";
 import askEnum from "../../../enums/modules/askEnum"
 import alertService from "../../../services/alertService";
 import LoadingComponent from "../components/LoadingComponent";
+import GoogleAuthComponent from './GoogleAuthComponent.vue';
 
 export default {
     name: "SignupPhoneComponent",
-    components: { LoadingComponent },
+    components: { LoadingComponent, GoogleAuthComponent },
     data() {
         return {
             loading: {

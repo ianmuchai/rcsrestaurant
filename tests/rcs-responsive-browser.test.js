@@ -20,19 +20,26 @@ import Footer from './resources/js/components/layouts/frontend/FrontendFooterCom
 import Slider from './resources/js/components/frontend/home/SliderComponent.vue';
 import Items from './resources/js/components/frontend/components/ItemComponent.vue';
 import Category from './resources/js/components/frontend/components/CategoryComponent.vue';
+import GoogleAuth from './resources/js/components/frontend/auth/GoogleAuthComponent.vue';
 import categoryDesignEnum from './resources/js/enums/modules/categoryDesignEnum';
 import itemDesignEnum from './resources/js/enums/modules/itemDesignEnum';
 const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page'];
 const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : '/' + name.split('.').pop(), component: { template: '<div />' } })) });
-const app = createApp({ components: { Mobile, Footer, Slider, Items, Category },
+const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth },
   data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 1,250.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
-  template: '<div class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><section class="rcs-featured-glass-section"><div class="container"><div class="rcs-featured-glass-panel"><h2 class="rcs-featured-title">Featured Items</h2><div class="rcs-featured-items-grid"><Items :items="items" :design="design" :type="null" /></div></div></div></section><Footer /><Mobile /></div>'
+  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><section class="rcs-featured-glass-section"><div class="container"><div class="rcs-featured-glass-panel"><h2 class="rcs-featured-title">Featured Items</h2><div class="rcs-featured-items-grid"><Items :items="items" :design="design" :type="null" /></div></div></div></section><Footer /><Mobile /></div>'
 });
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
  'frontendSetting/lists': { theme_footer_logo: '/images/theme/theme-favicon-logo.png', site_copyright: "RC's Restaurant", social_media_instagram: 'https://instagram.com' },
  'frontendPage/lists': ['About Us', 'Privacy Policy', 'Terms & Conditions', 'Contact Us'].map((title, id) => ({ id, title, slug: 'page-' + id }))
-}, dispatch: () => Promise.resolve({ data: {} }) };
+}, dispatch: (action, payload) => {
+ if (action === 'googleLogin') {
+   window.lastGooglePayload = payload;
+   if (window.googleLoginError) return Promise.reject({ response: { data: { errors: { credential: [window.googleLoginError] } } } });
+ }
+ return Promise.resolve({ data: {} });
+} };
 app.config.globalProperties.$t = value => value.split('.').pop();
 app.use(router); router.isReady().then(() => app.mount('#app'));
 `;
@@ -79,6 +86,21 @@ async function main() {
         const page = await browser.newPage({ hasTouch: true });
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
+        let googleEnabled = false;
+        await page.route('**/auth/google/config', route => route.fulfill({ json: googleEnabled
+            ? { enabled: true, client_id: 'test-client-id', nonce: 'a'.repeat(64) } : { enabled: false } }));
+        await page.route('https://accounts.google.com/gsi/client', route => route.fulfill({ contentType: 'application/javascript', body: `
+            window.google = { accounts: { id: {
+                initialize(options) { window.googleOptions = options; },
+                renderButton(element) {
+                    element.replaceChildren();
+                    const button = document.createElement('button');
+                    button.textContent = 'Google test account';
+                    button.onclick = () => window.googleOptions.callback({ credential: 'verified-test-credential' });
+                    element.appendChild(button);
+                }
+            } } };
+        ` }));
         // Opt into the network-dependent playback check separately.
         if (!process.env.RCS_CHECK_VIDEO) {
             await page.route('https://videos.pexels.com/**', route => route.abort());
@@ -109,7 +131,7 @@ async function main() {
             assert(dimensions.logo.bottom < dimensions.order.y, 'Logo and order button must have clear separation');
             if (viewport.width < 1024) {
                 assert(dimensions.header.height <= 49, 'Mobile header must be compact');
-                assert.strictEqual(dimensions.headerBackground, 'rgba(255, 255, 255, 0.45)', 'Header should have a transparent glass tint');
+                assert.strictEqual(dimensions.headerBackground, 'rgba(255, 255, 255, 0.88)', 'Header should provide strong contrast over the video');
                 assert(dimensions.headerBlur.includes('blur(24px)'), 'Header should blur the video behind it');
                 assert.strictEqual(dimensions.hero.y, 0, 'Video should extend beneath the glass header');
                 assert(dimensions.hero.height >= viewport.height - 50, 'Mobile video hero must remain tall');
@@ -168,6 +190,24 @@ async function main() {
             await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-responsive-' + viewport.width + '.png'), fullPage: true });
             console.log('Responsive layout passed:', viewport.width, 'header', dimensions.header.height, 'hero', dimensions.hero.height, 'footer', dimensions.footer.height);
         }
+        await page.setViewportSize({ width: 390, height: 844 });
+        const googleTestUrl = 'http://127.0.0.1:' + server.address().port + '/?google=1';
+        await page.goto(googleTestUrl);
+        await page.getByRole('button', { name: 'Sign up with Google' }).click();
+        assert((await page.getByRole('alert').textContent()).includes('currently unavailable'));
+        googleEnabled = true;
+        await page.goto(googleTestUrl);
+        await page.getByRole('button', { name: 'Google test account' }).click();
+        await page.waitForURL('http://127.0.0.1:' + server.address().port + '/');
+        assert.deepStrictEqual(await page.evaluate(() => window.lastGooglePayload), {
+            credential: 'verified-test-credential', nonce: 'a'.repeat(64)
+        });
+        await page.goto(googleTestUrl);
+        await page.evaluate(() => { window.googleLoginError = 'Please sign in using your existing method.'; });
+        await page.getByRole('button', { name: 'Google test account' }).click();
+        assert.strictEqual(await page.getByRole('alert').textContent(), 'Please sign in using your existing method.');
+        assert.strictEqual(page.url(), googleTestUrl);
+        console.log('Google signup: unavailable state, credential submission, navigation and account conflict passed');
         assert.deepStrictEqual(errors, [], 'Components must render without runtime errors');
     } finally {
         if (browser) await browser.close();

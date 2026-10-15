@@ -124,6 +124,8 @@ Route::match(['get', 'post'], '/login', function () {
 Route::match(['get', 'post'], '/refresh-token', [RefreshTokenController::class, 'refreshToken'])->middleware(['installed']);
 
 Route::prefix('auth')->middleware(['installed', 'apiKey', 'localization'])->name('auth.')->namespace('Auth')->group(function () {
+    Route::get('/google/config', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'configuration'])->middleware('throttle:20,1');
+    Route::post('/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/login', [LoginController::class, 'login']);
 
     Route::post('/kiosk-login', [KioskMachineLoginController::class, 'login']);

@@ -13,6 +13,7 @@
                     <i class="lab lab-close-circle-line"></i>
                 </button>
             </div>
+            <GoogleAuthComponent mode="login" />
             <form @submit.prevent="login">
                 <div class="mb-4">
                     <label for="formEmail" class="text-sm capitalize mb-1 text-heading">{{ $t('label.emailorphone') }}</label>
@@ -103,6 +104,7 @@
 <script>
 import router from "../../../router";
 import LoadingComponent from "../components/LoadingComponent";
+import GoogleAuthComponent from './GoogleAuthComponent.vue';
 import alertService from "../../../services/alertService";
 import appService from "../../../services/appService";
 import ENV from "../../../config/env";
@@ -111,7 +113,7 @@ import { routes } from "../../../router";
 
 export default {
     name: "LoginComponent",
-    components: { LoadingComponent },
+    components: { LoadingComponent, GoogleAuthComponent },
     data() {
         return {
             loading: {

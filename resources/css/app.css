@@ -870,6 +870,71 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     text-align: center;
 }
 
+.rcs-google-auth {
+    width: 100%;
+    margin-bottom: 20px;
+    font-family: "Public Sans", "Rubik", sans-serif;
+}
+
+.rcs-google-button-slot {
+    display: flex;
+    justify-content: center;
+    min-height: 44px;
+    width: 100%;
+}
+
+.rcs-google-auth-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D9DBE9;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1F1F39;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.rcs-google-auth-button:focus-visible {
+    outline: 2px solid #007500;
+    outline-offset: 3px;
+}
+
+.rcs-google-auth-button:disabled,
+.rcs-google-auth[aria-busy="true"] .rcs-google-button-slot {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.rcs-google-auth-error {
+    margin-top: 10px;
+    color: #B42318;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.rcs-auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    color: #6E7191;
+    font-size: 12px;
+}
+
+.rcs-auth-divider::before,
+.rcs-auth-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: #EFF0F6;
+}
+
 @media (max-width: 900px) {
     .rcs-footer-strip {
         align-items: flex-start;
@@ -1968,7 +2033,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
         height: calc(48px + env(safe-area-inset-top));
         padding: env(safe-area-inset-top) 8px 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        background: rgba(255, 255, 255, 0.45);
+        background: rgba(255, 255, 255, 0.88);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 6px 20px rgba(15, 23, 42, 0.08);
         backdrop-filter: blur(24px) saturate(1.4);
         -webkit-backdrop-filter: blur(24px) saturate(1.4);
@@ -1981,9 +2046,10 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
         width: 44px;
         height: 44px;
         border-radius: 8px;
-        color: #00A800;
+        color: #007500;
         font-size: 18px;
-        background: transparent;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(0, 117, 0, 0.12);
     }
 
     .rcs-mobile-icon:focus-visible {

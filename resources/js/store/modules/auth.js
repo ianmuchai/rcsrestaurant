@@ -45,6 +45,12 @@ export const auth = {
         }
     },
     actions: {
+        googleLogin: function (context, payload) {
+            return axios.post('auth/google', payload).then(res => {
+                context.commit('authLogin', res.data);
+                return res;
+            });
+        },
         login: function (context, payload) {
             return new Promise((resolve, reject) => {
                 axios.post('auth/login', payload).then((res) => {
