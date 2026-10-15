@@ -40,7 +40,8 @@ assert(
         && source.includes(":freeMode=\"categoryFreeMode\"")
         && source.includes(":loop=\"true\"")
         && source.includes(":loopAdditionalSlides=\"categoryLoopAdditionalSlides\"")
-        && source.includes(":allowTouchMove=\"false\"")
+        && source.includes(":allowTouchMove=\"true\"")
+        && source.includes(":loopPreventsSliding=\"false\"")
         && source.includes("Autoplay")
         && source.includes("FreeMode"),
     "Category menu should autoscroll continuously using Swiper autoplay, loop, and free mode"

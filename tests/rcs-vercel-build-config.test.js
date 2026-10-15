@@ -107,7 +107,7 @@ const envConfigSource = fs.readFileSync(envConfigPath, "utf8");
 assert(
     publicIndexHtml.includes("<!DOCTYPE html>")
         && publicIndexHtml.includes("<default-component />")
-        && publicIndexHtml.includes('/js/app.js?v=20260723g')
+        && /src="\/js\/app\.js\?v=[a-zA-Z0-9-]+"/.test(publicIndexHtml)
         && /href="\/css\/app\.css\?v=[a-zA-Z0-9-]+"/.test(publicIndexHtml)
         && publicIndexHtml.includes('window.APP_URL = "https://rcs.co.ke";')
         && publicIndexHtml.includes("window.APP_KEY = ")

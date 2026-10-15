@@ -1,14 +1,15 @@
 <template>
     <Swiper dir="ltr" :modules="carouselModules" :speed="6500" slidesPerView="auto" :spaceBetween="16"
         :autoplay="categoryAutoplay" :freeMode="categoryFreeMode" :loop="true"
-        :loopAdditionalSlides="categoryLoopAdditionalSlides" :allowTouchMove="false" class="menu-slides">
+        :loopAdditionalSlides="categoryLoopAdditionalSlides" :allowTouchMove="true" :grabCursor="true"
+        :loopPreventsSliding="false" class="menu-slides">
         <SwiperSlide v-for="(category, index) in carouselCategories"
             :key="`${category.id || category.slug || category.name}-${index}`" class="!w-fit">
             <router-link v-if="design === categoryDesignEnum.FIRST"
                 :to="{ name: 'frontend.menu', query: { s: category.slug } }"
                 class="w-40 min-h-[154px] flex flex-col items-center text-center gap-3 p-3 rounded-2xl border-b-2 border-transparent transition hover:bg-[#FFEDF4] bg-[#F7F7FC]">
                 <span class="rcs-category-photo-frame rcs-category-photo-frame-lg">
-                    <img class="rcs-category-photo" :src="categoryPhoto(category)"
+                    <img class="rcs-category-photo" :src="categoryPhoto(category)" draggable="false"
                         :alt="`${category.name} food photo`" loading="lazy"
                         @error="handleCategoryPhotoError($event, category)">
                 </span>
@@ -20,7 +21,7 @@
                 :to="{ name: 'frontend.menu', query: { s: category.slug } }"
                 class="w-40 min-h-[140px] flex flex-col items-center text-center gap-3 p-3 rounded-2xl border-b-2 border-transparent transition hover:bg-[#FFEDF4]">
                 <span class="rcs-category-photo-frame">
-                    <img class="rcs-category-photo" :src="categoryPhoto(category)"
+                    <img class="rcs-category-photo" :src="categoryPhoto(category)" draggable="false"
                         :alt="`${category.name} food photo`" loading="lazy"
                         @error="handleCategoryPhotoError($event, category)">
                 </span>

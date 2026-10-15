@@ -19,12 +19,14 @@ import Mobile from './resources/js/components/layouts/frontend/FrontendMobileNav
 import Footer from './resources/js/components/layouts/frontend/FrontendFooterComponent.vue';
 import Slider from './resources/js/components/frontend/home/SliderComponent.vue';
 import Items from './resources/js/components/frontend/components/ItemComponent.vue';
+import Category from './resources/js/components/frontend/components/CategoryComponent.vue';
+import categoryDesignEnum from './resources/js/enums/modules/categoryDesignEnum';
 import itemDesignEnum from './resources/js/enums/modules/itemDesignEnum';
 const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page'];
 const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : '/' + name.split('.').pop(), component: { template: '<div />' } })) });
-const app = createApp({ components: { Mobile, Footer, Slider, Items },
-  data: () => ({ design: itemDesignEnum.GRID, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 1,250.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
-  template: '<div class="rcs-frontend-layout"><Slider /><section class="rcs-featured-glass-section"><div class="container"><div class="rcs-featured-glass-panel"><h2 class="rcs-featured-title">Featured Items</h2><div class="rcs-featured-items-grid"><Items :items="items" :design="design" :type="null" /></div></div></div></section><Footer /><Mobile /></div>'
+const app = createApp({ components: { Mobile, Footer, Slider, Items, Category },
+  data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 1,250.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
+  template: '<div class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><section class="rcs-featured-glass-section"><div class="container"><div class="rcs-featured-glass-panel"><h2 class="rcs-featured-title">Featured Items</h2><div class="rcs-featured-items-grid"><Items :items="items" :design="design" :type="null" /></div></div></div></section><Footer /><Mobile /></div>'
 });
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
@@ -74,7 +76,7 @@ async function main() {
     try {
         browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true,
             args: ['--disable-gpu', '--disable-gpu-compositing', '--disable-gpu-rasterization', '--disable-software-rasterizer', '--no-sandbox'] });
-        const page = await browser.newPage();
+        const page = await browser.newPage({ hasTouch: true });
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         // Opt into the network-dependent playback check separately.
@@ -130,6 +132,38 @@ async function main() {
             }
             for (const name of ['Android', 'iOS']) {
                 assert.strictEqual(await page.locator('.rcs-footer-download-button').filter({ hasText: name }).getAttribute('href'), '/install-app');
+            }
+            if ([390, 1440].includes(viewport.width)) {
+                await page.locator('.menu-slides').scrollIntoViewIfNeeded();
+                const box = await page.locator('.menu-slides').boundingBox();
+                const x = viewport.width / 2, y = box.y + box.height / 2;
+                const urlBeforeDrag = page.url();
+                const session = await page.context().newCDPSession(page);
+                const position = () => page.locator('.menu-slides').evaluate(el => el.swiper.getTranslate());
+                for (const direction of [-1, 1]) {
+                    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+                    await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + direction * 20, y }] });
+                    const before = await position();
+                    for (let distance = 40; distance <= 100; distance += 20) {
+                        await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + direction * distance, y }] });
+                    }
+                    const after = await position();
+                    assert((after - before) * direction > 30, 'Touch must move the carousel in either direction');
+                    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+                    assert.strictEqual(page.url(), urlBeforeDrag, 'Swiping must not open a category');
+                    const released = await position();
+                    await page.waitForFunction(start => {
+                        const swiper = document.querySelector('.menu-slides').swiper;
+                        return swiper.autoplay.running && Math.abs(swiper.getTranslate() - start) > 2;
+                    }, released, { timeout: 3000 });
+                }
+                await session.detach();
+                const target = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y).closest('a')?.getAttribute('href'), { x, y });
+                assert(target, 'A category should be tappable after swiping');
+                await page.touchscreen.tap(x, y);
+                await page.waitForURL('**' + target);
+                console.log('Category touch left/right, autoplay resume and tap passed:', viewport.width);
+                await page.evaluate(() => scrollTo(0, 0));
             }
             await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-responsive-' + viewport.width + '.png'), fullPage: true });
             console.log('Responsive layout passed:', viewport.width, 'header', dimensions.header.height, 'hero', dimensions.hero.height, 'footer', dimensions.footer.height);
