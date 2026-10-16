@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'mpesa' => [
+        'base_url' => env('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke'),
+    ],
+    'storefront' => [
+        'url' => env('STOREFRONT_URL', env('APP_URL')),
+    ],
     'google_sign_in' => [
         'client_id' => env('GOOGLE_SIGN_IN_CLIENT_ID', ''),
     ],

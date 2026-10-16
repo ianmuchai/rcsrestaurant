@@ -43,7 +43,7 @@ Route::prefix('payment')->name('payment.')->middleware(['installed'])->group(fun
     Route::post('mpesa/callback', [PaymentController::class, 'handleMpesaCallback'])
         ->name('mpesa.callback');
     Route::get('status/{checkoutRequestId}', [PaymentController::class, 'checkPaymentStatus'])
-        ->name('api.payment.status');
+        ->middleware('throttle:30,1')->name('api.payment.status');
 
 });
 

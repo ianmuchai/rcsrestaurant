@@ -105,7 +105,7 @@
                             </li>
                         </ul>
 
-                        <a :href="'/payment/' + order.id + '/pay'"
+                        <a :href="paymentUrl"
                             v-if="setting.site_online_payment_gateway === enums.activityEnum.ENABLE && order.transaction === null && order.payment_status === enums.paymentStatusEnum.UNPAID"
                             class="w-full rounded-3xl capitalize font-medium text-center leading-6 py-3 text-white bg-primary">
                             {{ $t('button.pay_now') }}
@@ -224,6 +224,8 @@ import OrderStatusComponent from "../../components/OrderStatusComponent";
 import OrderDetailsMapComponent from "./OrderDetailsMapComponent";
 import FrontendOrderReceiptComponent from "./FrontendOrderReceiptComponent";
 import activityEnum from "../../../../enums/modules/activityEnum";
+import ENV from '../../../../config/env';
+import { paymentCheckoutUrl } from '../../../../services/paymentLinks';
 import sourceEnum from "../../../../enums/modules/sourceEnum";
 import posPaymentMethodEnum from "../../../../enums/modules/posPaymentMethodEnum";
 
@@ -278,6 +280,9 @@ export default {
         };
     },
     computed: {
+        paymentUrl() {
+            return this.order.id ? paymentCheckoutUrl(this.order.id, ENV.API_URL) : '';
+        },
         setting: function () {
             return this.$store.getters['frontendSetting/lists'];
         },

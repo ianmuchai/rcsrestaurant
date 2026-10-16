@@ -47,11 +47,13 @@
                 <div class="bg-white text-center rounded-lg p-8 shadow-lg max-w-md w-full">
                     <div class="mb-4">
                         <div class="loader mb-4 mx-auto border-4 border-blue-200 border-t-blue-600 rounded-full w-12 h-12 animate-spin"></div>
-                        <p class="text-lg font-semibold">{{ session('message') }}...</p>
+                        <p id="paymentWaitingMessage" class="text-lg font-semibold">{{ session('message') }}</p>
                     </div>
-                    <button id="cancelPayment" class="btn btn-danger">
-                        Cancel Payment
+                    <button id="checkPaymentAgain" type="button" hidden class="btn btn-primary">Check payment status</button>
+                    <button id="cancelPayment" type="button" class="btn btn-danger">
+                        Back to payment options
                     </button>
+                    <p class="text-sm mt-3">Leaving this page does not cancel a phone prompt. Do not pay twice for the same order.</p>
 
                 </div>
             </div>
@@ -172,25 +174,52 @@
             const cancelUrl = `{{ route('payment.cancel',['paymentGateway' => "lipanampesa", 'order' => $order->id]) }}`;
             const paymentStatusUrl = "{{ route('payment.api.payment.status', ['checkoutRequestId' => session('checkout_request_id')]) }}";
 
-            let checkInterval = setInterval(() => {
-                fetch(paymentStatusUrl)
-                    .then(response => response.json())
-                    .then(data => {
+            let checkTimer;
+            let startedAt = Date.now();
+            let stopped = false;
+            const waitingMessage = document.getElementById('paymentWaitingMessage');
+            const checkAgain = document.getElementById('checkPaymentAgain');
+            async function checkStatus() {
+                if (stopped) return;
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 12000);
+                try {
+                    const response = await fetch(paymentStatusUrl, { cache: 'no-store', signal: controller.signal });
+                    if (!response.ok) throw new Error('Payment status unavailable');
+                    const data = await response.json();
                         if (data.status === 'completed') {
-                            clearInterval(checkInterval);
+                            stopped = true;
                             window.location.href = successUrl;
+                            return;
                         } else if (data.status === 'failed') {
-                            clearInterval(checkInterval);
+                            stopped = true;
                             window.location.href = failUrl;
+                            return;
                         }
-                    })
-                    .catch(err => {
-                        console.error('Error checking payment status:', err);
-                    });
-            }, 5000);
+                } catch (error) {
+                    waitingMessage.textContent = 'We are still checking your payment. Please do not pay again while confirmation is pending.';
+                } finally {
+                    clearTimeout(timeout);
+                }
+                if (stopped) return;
+                if (Date.now() - startedAt >= 180000) {
+                    waitingMessage.textContent = 'Confirmation is taking longer than expected. Your order remains saved. Check the status or contact the restaurant before making another payment.';
+                    checkAgain.hidden = false;
+                    return;
+                }
+                checkTimer = setTimeout(checkStatus, 5000);
+            }
+            checkAgain.addEventListener('click', () => {
+                clearTimeout(checkTimer);
+                startedAt = Date.now();
+                checkAgain.hidden = true;
+                checkStatus();
+            });
+            checkStatus();
 
             document.getElementById('cancelPayment')?.addEventListener('click', () => {
-                clearInterval(checkInterval);
+                stopped = true;
+                clearTimeout(checkTimer);
                 window.location.href = cancelUrl;
             });
         </script>
@@ -207,9 +236,10 @@
     </script>
     <script src="{{ asset('paymentGateways/payment.js') }}"></script>
     <script type="application/javascript">
-        let data       = JSON.parse(localStorage.getItem('vuex'));
+        let data = null;
+        try { data = JSON.parse(localStorage.getItem('vuex')); } catch (error) {}
         const url      = '<?=URL::to('/') . "/menu/"?>';
-        if (data.tableCart.paymentMethod) {
+        if (data?.tableCart?.paymentMethod && data.tableCart.table?.slug) {
             document.getElementById('home-route').setAttribute('href', url + data.tableCart.table.slug);
             document.getElementById('home-route1').setAttribute('href', url + data.tableCart.table.slug);
         }

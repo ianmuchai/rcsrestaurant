@@ -168,7 +168,7 @@
                         :to="{ name: 'frontend.myOrder.details', params: { id: order.id } }">
                         {{ $t('button.go_to_order') }}
                     </router-link>
-                    <a :href="'/payment/' + order.id + '/pay'"
+                    <a :href="paymentUrl"
                         class="w-full rounded-3xl text-center font-medium leading-6 py-3 text-white bg-primary">
                         {{ $t('button.pay_now') }}
                     </a>
@@ -186,6 +186,8 @@
 </template>
 
 <script>
+import ENV from '../../../../config/env';
+import { paymentCheckoutUrl } from '../../../../services/paymentLinks';
 
 
 import orderStatusEnum from "../../../../enums/modules/orderStatusEnum";
@@ -274,6 +276,9 @@ export default {
         }
     },
     computed: {
+        paymentUrl() {
+            return this.order.id ? paymentCheckoutUrl(this.order.id, ENV.API_URL) : '';
+        },
         setting: function () {
             return this.$store.getters['frontendSetting/lists'];
         },

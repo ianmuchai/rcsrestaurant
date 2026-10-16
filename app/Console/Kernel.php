@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('payments:reconcile-mpesa')->everyMinute()->withoutOverlapping();
     }
 
     /**

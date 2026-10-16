@@ -29,7 +29,7 @@ class Lipanampesa extends FormRequest
         return [
             'mpesa_phone' => [
                 'required',
-                'regex:/^(254|07|01)\d{7,8}$/'
+                'regex:/\A(?:0[17]\d{8}|254[17]\d{8})\z/'
             ],
         ];
     }

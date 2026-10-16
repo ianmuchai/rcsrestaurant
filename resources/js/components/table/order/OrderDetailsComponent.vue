@@ -147,6 +147,8 @@
 </template>
 
 <script>
+import ENV from '../../../config/env';
+import { paymentCheckoutUrl } from '../../../services/paymentLinks';
 import LoadingComponent from "../../table/components/LoadingComponent.vue";
 import OrderStatusComponent from "../../table/components/OrderStatusComponent.vue";
 import OrderReceiptComponent from "../../table/order/OrderReceiptComponent.vue";
@@ -188,7 +190,7 @@ export default {
     methods: {
         preparePayment(orderId) {
            // Redirect to Laravel payment URL
-            window.location.href = `/payment/${orderId}/pay`;
+            window.location.href = paymentCheckoutUrl(orderId, ENV.API_URL);
         }
         ,
     },

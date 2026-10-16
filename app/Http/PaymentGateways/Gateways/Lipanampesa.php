@@ -9,9 +9,12 @@ use App\Models\Currency;
 use App\Models\PaymentGateway;
 use App\Services\PaymentService;
 use App\Services\PaymentAbstract;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use App\Enums\PaymentStatus;
+use App\Services\MpesaPaymentConfirmationService;
 use Smartisan\Settings\Facades\Settings;
 
 class Lipanampesa extends PaymentAbstract
@@ -39,7 +42,7 @@ class Lipanampesa extends PaymentAbstract
 
         $this->paymentGatewayOption = $this->paymentGateway->gatewayOptions->pluck('value', 'option');
 
-        $this->baseUrl = env('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke');
+        $this->baseUrl = config('services.mpesa.base_url', 'https://sandbox.safaricom.co.ke');
         $this->shortcode = $this->paymentGatewayOption['lipanampesa_shortcode'] ?? '174379';
         $this->shortcodeSecret = $this->paymentGatewayOption['lipanampesa_shortcode_secret'] ?? '';
         $this->lipaNaMpesaShortcode = $this->paymentGatewayOption['lipanampesa_shortcode'] ?? '174379';
@@ -54,7 +57,33 @@ class Lipanampesa extends PaymentAbstract
     public function payment($order, $request): \Illuminate\Http\RedirectResponse
     {
         try {
+            return Cache::lock('mpesa-initiate-order-' . $order->id, 90)
+                ->block(3, fn () => $this->initiatePayment($order, $request));
+        } catch (LockTimeoutException $exception) {
+            return redirect()->route('payment.index', ['order' => $order])
+                ->with('error', 'A payment request is already being sent. Please wait before trying again.');
+        }
+    }
+
+    private function initiatePayment($order, $request): \Illuminate\Http\RedirectResponse
+    {
+        try {
             $this->validateConfiguration();
+            $order->refresh();
+            if ($order->payment_status === PaymentStatus::PAID) {
+                return redirect()->route('payment.successful', ['order' => $order]);
+            }
+            $existing = StkRequest::where('order_id', $order->id)
+                ->whereIn('status', ['pending', 'completed'])->latest()->first();
+            if ($existing) {
+                if ($existing->status === 'completed' || $existing->created_at->lt(now()->subMinutes(5))) {
+                    $existing = app(MpesaPaymentConfirmationService::class)->reconcile($existing);
+                }
+                if ($existing->status === 'completed') {
+                    return redirect()->route('payment.successful', ['order' => $order]);
+                }
+                if ($existing->status === 'pending') return $this->pendingRedirect($order, $existing);
+            }
 
             if (empty($request->mpesa_phone)) {
                 throw new Exception('Phone number is required');
@@ -67,22 +96,21 @@ class Lipanampesa extends PaymentAbstract
 
             $timestamp = $this->getFormattedTimeStamp();
             $phoneNumber = $this->formatPhoneNumber($request->mpesa_phone);
+            $amount = round((float) $order->total, 2);
+            if ($amount < 1 || $amount !== floor($amount)) {
+                throw new Exception('M-Pesa requires a whole-shilling KES amount. Please contact the restaurant or choose another payment method.');
+            }
 
             $paymentData = array(
                 'BusinessShortCode' => $this->lipaNaMpesaShortcode,
                 'Password' => $this->generatePassword($timestamp),
                 'Timestamp' => $timestamp,
                 'TransactionType' => 'CustomerPayBillOnline',
-                'Amount' => number_format($order->total, 0, '.', ''),
+                'Amount' => (int) $amount,
                 'PartyA' => $phoneNumber,
                 'PartyB' => $this->lipaNaMpesaShortcode,
                 'PhoneNumber' => $phoneNumber,
-                'CallBackURL' =>'https://rcs.co.ke/categories',
-//                'CallBackURL' => route('payment.mpesa.callback'),
-//                'CallBackURL' => route('payment.success', [
-//                    'order' => $order,
-//                    'paymentGateway' => 'lipanampesa'
-//                ]),
+                'CallBackURL' => route('payment.mpesa.callback'),
                 'AccountReference' => "Order-{$order->id}",
                 'TransactionDesc' => "Payment for Order #{$order->id}",
             );
@@ -98,7 +126,7 @@ class Lipanampesa extends PaymentAbstract
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->getToken(),
                 'Content-Type' => 'application/json',
-            ])->withBody(json_encode($paymentData), 'application/json')
+            ])->connectTimeout(10)->timeout(30)->withBody(json_encode($paymentData), 'application/json')
                 ->post($url);
 
             $responseBody = $response->json();
@@ -111,7 +139,7 @@ class Lipanampesa extends PaymentAbstract
 
             if (isset($responseBody['CheckoutRequestID'])) {
                 // Store the STK request in database
-                StkRequest::create([
+                $attempt = StkRequest::create([
                     'merchant_request_id' => $responseBody['MerchantRequestID'],
                     'checkout_request_id' => $responseBody['CheckoutRequestID'],
                     'phone_number' => $phoneNumber,
@@ -121,25 +149,20 @@ class Lipanampesa extends PaymentAbstract
                 ]);
 
                 // Return success response with payment instructions
-                return redirect()->route('payment.index', ['order' => $order->id])
-                    ->with([
-                        'status' => 'pending',
-                        'message' => "A payment prompt has been sent to your phone {$this->maskPhoneNumber($phoneNumber)}. Please enter your M-Pesa PIN to complete the payment.",
-                        'checkout_request_id' => $responseBody['CheckoutRequestID'],
-                    ]);
+                return $this->pendingRedirect($order, $attempt);
 
             }
 
             throw new Exception('Missing CheckoutRequestID in response');
         } catch (Exception $e) {
-            Log::error("M-Pesa Payment Error: " . $e->__toString(), [
+            Log::error('M-Pesa initiation requires review', [
                 'order_id' => $order->id,
-                'exception' => $e
+                'exception' => get_class($e)
             ]);
             return redirect()->route('payment.index', [
                 'order' => $order,
                 'paymentGateway' => 'lipanampesa'
-            ])->with('error', 'Payment initiation failed: ' . $e->getMessage());
+            ])->with('error', 'The payment request could not be confirmed. If a phone prompt appeared or money was deducted, check with the restaurant before paying again.');
         }
     }
 
@@ -149,52 +172,45 @@ class Lipanampesa extends PaymentAbstract
     public function success($order, $request): \Illuminate\Http\RedirectResponse
     {
         try {
-            DB::transaction(function () use ($order, $request) {
-                // Retrieve the most recent successful STK request for the order
-                $stkRequest = StkRequest::where('order_id', $order->id)
-                    ->where('status', 'completed') // Assuming 'success' is the completed status
-                    ->latest() // Get the most recent
-                    ->first();
-
-                // Check if a successful STK request exists and if the amounts match
-                if ($stkRequest && $stkRequest->amount == $order->total) {
-                    // Proceed with the payment processing logic (You may replace the following with your logic)
-                    $this->paymentService->payment($order, 'lipanampesa', $stkRequest->mpesa_receipt_number);
-
-                    // Optionally update the order status to 'paid'
-                    $order->update([
-                        'payment_status' => '5', // Assuming you have a 'paid' status
-                        'status' => '2', // Change the order status to completed
-                    ]);
-
-                    // Set a successful response flag
-                    $this->response = true;
-                } else {
-                    // Handle case where STK request failed or amounts don't match
-                    $this->response = false;
-                }
-            });
-
-            // Check response flag and redirect accordingly
-            if ($this->response) {
+            $attempt = StkRequest::where('order_id', $order->id)->latest()->first();
+            if ($attempt) app(MpesaPaymentConfirmationService::class)->reconcile($attempt);
+            $order->refresh();
+            if ($order->payment_status === PaymentStatus::PAID && $order->transaction) {
                 return redirect()->route('payment.successful', ['order' => $order])->with(
                     'success',
                     trans('all.message.payment_successful')
                 );
             }
 
-            return redirect()->route('payment.fail', ['order' => $order, 'paymentGateway' => 'lipanampesa'])->with(
-                'error',
-                trans('all.message.payment_failed')
-            );
+            if ($attempt && $attempt->fresh()->status === 'pending') return $this->pendingRedirect($order, $attempt);
+            return $this->fail($order, $request);
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            DB::rollBack();
-            return redirect()->route('payment.fail', ['order' => $order, 'paymentGateway' => 'lipanampesa'])->with(
-                'error',
-                $e->getMessage()
-            );
+            return redirect()->route('payment.index', ['order' => $order])
+                ->with('error', 'Payment confirmation is temporarily unavailable. Please check the order before paying again.');
         }
+    }
+
+    public function queryStatus(StkRequest $attempt): array
+    {
+        $this->validateConfiguration();
+        $timestamp = $this->getFormattedTimeStamp();
+        return Http::withToken($this->getToken())->acceptJson()->connectTimeout(10)->timeout(20)
+            ->post($this->baseUrl . '/mpesa/stkpushquery/v1/query', [
+                'BusinessShortCode' => $this->shortcode,
+                'Password' => $this->generatePassword($timestamp),
+                'Timestamp' => $timestamp,
+                'CheckoutRequestID' => $attempt->checkout_request_id,
+            ])->throw()->json();
+    }
+
+    private function pendingRedirect($order, StkRequest $attempt): \Illuminate\Http\RedirectResponse
+    {
+        return redirect()->route('payment.index', ['order' => $order->id])->with([
+            'status' => 'pending',
+            'message' => 'Waiting for M-Pesa confirmation for ' . $this->maskPhoneNumber($attempt->phone_number) . '. Please complete the phone prompt and avoid paying again.',
+            'checkout_request_id' => $attempt->checkout_request_id,
+        ]);
     }
 
     /**
@@ -252,7 +268,7 @@ class Lipanampesa extends PaymentAbstract
 
         $response = Http::withHeaders([
             'Authorization' => 'Basic ' . base64_encode($this->lipaNaMpesaKey . ':' . $this->shortcodeSecret)
-        ])->get($url);
+        ])->connectTimeout(10)->timeout(20)->get($url);
 
         if (!$response->successful()) {
             Log::error('Token generation failed', [
@@ -286,15 +302,11 @@ class Lipanampesa extends PaymentAbstract
     {
         $cleaned = preg_replace('/[^0-9]/', '', $phone);
 
-        if (strlen($cleaned) === 9 && strpos($cleaned, '0') === 0) {
-            return '254' . substr($cleaned, 1);
-        }
-
-        if (strlen($cleaned) === 12 && strpos($cleaned, '254') === 0) {
+        if (preg_match('/\A254[17]\d{8}\z/', $cleaned)) {
             return $cleaned;
         }
 
-        if (strlen($cleaned) === 10 && strpos($cleaned, '0') === 0) {
+        if (preg_match('/\A0[17]\d{8}\z/', $cleaned)) {
             return '254' . substr($cleaned, 1);
         }
 
@@ -345,40 +357,4 @@ class Lipanampesa extends PaymentAbstract
         return substr($phone, 0, 4) . '****' . substr($phone, -3);
     }
 
-    /**
-     * Handle M-Pesa callback response
-     */
-    private function handleCallbackResponse($order, $request): \Illuminate\Http\RedirectResponse
-    {
-        $callback = $request['Body']['stkCallback'] ?? null;
-
-        if ($callback && isset($callback['ResultCode'])) {
-            if ($callback['ResultCode'] == 0) {
-                $metadata = $callback['CallbackMetadata']['Item'] ?? [];
-                $paymentData = [];
-
-                foreach ($metadata as $item) {
-                    $paymentData[$item['Name']] = $item['Value'];
-                }
-
-                $paymentReference = $paymentData['MpesaReceiptNumber'] ?? null;
-                if ($paymentReference) {
-                    $this->paymentService->payment($order, 'lipanampesa', $paymentReference);
-                    return redirect()->route('payment.successful', ['order' => $order])
-                        ->with('success', 'Payment successful');
-                }
-            } else {
-                $error = $callback['ResultDesc'] ?? 'Payment failed';
-                return redirect()->route('payment.index', [
-                    'order' => $order,
-                    'paymentGateway' => 'lipanampesa'
-                ])->with('error', $error);
-            }
-        }
-
-        return redirect()->route('payment.index', [
-            'order' => $order,
-            'paymentGateway' => 'lipanampesa'
-        ])->with('error', 'Invalid payment response');
-    }
 }

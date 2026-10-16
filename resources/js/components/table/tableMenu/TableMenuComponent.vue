@@ -100,7 +100,7 @@
                         :to="{ name: 'table.tableOrder.details', params: { slug: this.$route.params.slug, id: order.id } }">
                         {{ $t('button.go_to_order') }}
                     </router-link>
-                    <a :href="'/payment/' + order.id + '/pay'"
+                    <a :href="paymentUrl"
                         class="w-full rounded-3xl text-center font-medium leading-6 py-3 text-white bg-primary">
                         {{ $t('button.pay_now') }}
                     </a>
@@ -118,6 +118,8 @@
 </template>
 
 <script>
+import ENV from '../../../config/env';
+import { paymentCheckoutUrl } from '../../../services/paymentLinks';
 import LoadingComponent from "../../table/components/LoadingComponent.vue";
 import statusEnum from "../../../enums/modules/statusEnum";
 import ItemComponent from "../components/ItemComponent.vue";
@@ -181,6 +183,9 @@ export default {
         }
     },
     computed: {
+        paymentUrl() {
+            return this.order.id ? paymentCheckoutUrl(this.order.id, ENV.API_URL) : '';
+        },
         categories: function () {
             return this.$store.getters["tableItemCategory/lists"];
         },

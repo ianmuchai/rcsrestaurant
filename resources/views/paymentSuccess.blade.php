@@ -30,15 +30,16 @@
             <dt class="uppercase py-2.5 rounded-tl-lg rounded-tr-lg text-heading bg-[#F7F7FC]">{{ __('all.label.transaction_id')  }}</dt>
             <dd class="uppercase py-3 rounded-bl-lg rounded-br-lg payment-font-size font-medium leading-10 text-heading bg-white">{{ $order?->transaction?->transaction_no }}</dd>
         </dl>
-        <a id="home-route" href="{{ route('home') }}" class="py-3 w-full rounded-3xl text-center text-base font-medium bg-primary text-white">{{ __('all.label.back_to_home') }}</a>
+        <a id="home-route" href="{{ rtrim(config('services.storefront.url') ?: config('app.url'), '/') . '/my-orders/' . $order->id }}" class="py-3 w-full rounded-3xl text-center text-base font-medium bg-primary text-white">View order</a>
     </div>
 </div>
 
 <script type="application/javascript">
-    let data       = JSON.parse(localStorage.getItem('vuex'));
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem('vuex')); } catch (error) {}
     const url      = '<?=URL::to('/') . "/table-order/"?>';
     const order_id = '<?=$order?->id?>';
-    if (data.tableCart.paymentMethod) {
+    if (data?.tableCart?.paymentMethod && data.tableCart.table?.slug) {
         document.getElementById('home-route').setAttribute('href', url + data.tableCart.table.slug + '/' + order_id);
     }
 </script>

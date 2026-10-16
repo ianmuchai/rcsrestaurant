@@ -13,10 +13,13 @@ use App\Models\PaymentGateway;
 use App\Models\StkRequest;
 use App\Models\ThemeSetting;
 use App\Services\PaymentManagerService;
+use App\Services\MpesaPaymentConfirmationService;
 use Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Smartisan\Settings\Facades\Settings;
 
 class PaymentController extends Controller
@@ -42,70 +45,49 @@ class PaymentController extends Controller
             ], 404);
         }
 
+        if ($stkRequest->status === 'pending'
+            || ($stkRequest->status === 'completed' && $stkRequest->order?->payment_status !== PaymentStatus::PAID)) {
+            try {
+                Cache::lock('mpesa-confirm-' . $stkRequest->id, 45)->get(function () use ($stkRequest) {
+                    app(MpesaPaymentConfirmationService::class)->reconcile($stkRequest);
+                });
+                $stkRequest->refresh();
+            } catch (\Throwable $exception) {
+                Log::warning('M-Pesa confirmation is pending', ['attempt_id' => $stkRequest->id]);
+            }
+        }
+        $paid = $stkRequest->order?->payment_status === PaymentStatus::PAID;
         return response()->json([
-            'status' => $stkRequest->status,
+            'status' => $stkRequest->status === 'completed' && !$paid ? 'pending' : $stkRequest->status,
             'order_id' => $stkRequest->order_id,
-            'mpesa_receipt_number' => $stkRequest->mpesa_receipt_number,
-            'amount' => $stkRequest->amount,
-            'phone_number' => $stkRequest->phone_number,
-            'updated_at' => $stkRequest->updated_at,
-        ]);
+        ])->header('Cache-Control', 'no-store');
     }
 
     public function handleMpesaCallback(Request $request)
     {
-        Log::info('M-Pesa Callback Received:', $request->all());
-
         try {
-            $callbackData = $request->json('Body.stkCallback');
-
-            if (!$callbackData) {
-                throw new Exception('Invalid callback format');
-            }
-
-            $checkoutRequestId = $callbackData['CheckoutRequestID'];
-            $stkRequest = StkRequest::where('checkout_request_id', $checkoutRequestId)->first();
-
-            if (!$stkRequest) {
-                throw new Exception("STK request not found: {$checkoutRequestId}");
-            }
-
-            $resultCode = $callbackData['ResultCode'];
-            $resultDesc = $callbackData['ResultDesc'];
-            $status = ($resultCode === 0 && isset($callbackData['CallbackMetadata'])) ? 'completed' : 'failed';
-
-            $updateData = [
-                'status' => $status,
-                'response_description' => $resultDesc,
-            ];
-
-            if ($status === 'completed') {
-                $metadata = collect($callbackData['CallbackMetadata']['Item'])
-                    ->pluck('Value', 'Name')
-                    ->toArray();
-
-                $updateData['mpesa_receipt_number'] = $metadata['MpesaReceiptNumber'] ?? null;
-                $updateData['phone_number'] = $metadata['PhoneNumber'] ?? null;
-                $updateData['amount'] = $metadata['Amount'] ?? null;
-                $updateData['callback_metadata'] = $metadata;
-            }
-
-            $stkRequest->update($updateData);
+            $request->validate([
+                'Body.stkCallback.CheckoutRequestID' => ['required', 'string', 'max:191'],
+                'Body.stkCallback.MerchantRequestID' => ['required', 'string', 'max:191'],
+                'Body.stkCallback.ResultCode' => ['required', 'integer'],
+                'Body.stkCallback.CallbackMetadata.Item' => ['sometimes', 'array'],
+            ]);
+            app(MpesaPaymentConfirmationService::class)->handleCallback($request->input('Body.stkCallback'));
 
             return response()->json([
                 'ResultCode' => 0,
                 'ResultDesc' => 'Callback processed successfully'
             ]);
 
-        } catch (Exception $e) {
-            Log::error("M-Pesa Callback Error: " . $e->getMessage(), [
-                'callback_data' => $request->all()
-            ]);
+        } catch (ValidationException $exception) {
+            return response()->json(['ResultCode' => 1, 'ResultDesc' => 'Invalid payment confirmation.'], 422);
+        } catch (\Throwable $exception) {
+            Log::error('M-Pesa callback requires reconciliation', ['exception' => get_class($exception)]);
 
             return response()->json([
                 'ResultCode' => 1,
-                'ResultDesc' => 'Error processing callback: ' . $e->getMessage()
-            ], 500);
+                'ResultDesc' => 'Payment confirmation is temporarily unavailable.'
+            ], 503);
         }
     }
 
@@ -115,6 +97,9 @@ class PaymentController extends Controller
     public function index(
         Order $order
     ): \Illuminate\Contracts\View\Factory | \Illuminate\Contracts\View\View | \Illuminate\Contracts\Foundation\Application | \Illuminate\Http\RedirectResponse {
+        if ($order->payment_status === PaymentStatus::PAID && $order->transaction) {
+            return redirect()->route('payment.successful', ['order' => $order]);
+        }
         $credit          = false;
         $paymentGateways = PaymentGateway::with('gatewayOptions')->whereNotIn('id', [1])->where(['status' => Activity::ENABLE])->get();
         $company         = Settings::group('company')->all();
@@ -177,7 +162,7 @@ class PaymentController extends Controller
         $logo        = ThemeSetting::where(['key' => 'theme_logo'])->first();
         $faviconLogo = ThemeSetting::where(['key' => 'theme_favicon_logo'])->first();
 
-        if (!blank($order->transaction)) {
+        if ($order->payment_status === PaymentStatus::PAID && !blank($order->transaction)) {
             return view('paymentSuccess', [
                 'company'     => $company,
                 'logo'        => $logo,
