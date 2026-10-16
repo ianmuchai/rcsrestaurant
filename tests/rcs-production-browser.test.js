@@ -21,6 +21,12 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0);
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             assert.strictEqual(await page.locator('.rcs-hero-link-panel .rcs-hero-centered-logo').count(), 1);
+            assert.strictEqual(await page.locator('.rcs-footer-tagline').innerText(), 'Bringing class to cuisine');
+            assert.strictEqual(await page.locator('.rcs-front-video-hero .rcs-footer-tagline').count(), 0);
+            assert.strictEqual(await page.locator('.rcs-footer-quicklinks a').filter({ hasText: /^Menu$/ }).getAttribute('href'), '/menu');
+            for (const platform of ['Android', 'iOS']) {
+                assert.strictEqual(await page.locator('.rcs-footer-download-button').filter({ hasText: platform }).getAttribute('href'), '/install-app');
+            }
             const menu = page.locator('.rcs-hero-menu-button');
             assert.strictEqual(await menu.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(86, 91, 96)');
             assert.strictEqual(await menu.evaluate(el => getComputedStyle(el).color), 'rgb(255, 255, 255)');

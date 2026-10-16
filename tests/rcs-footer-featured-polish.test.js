@@ -50,16 +50,20 @@ assert(
 
 assert(
     cssSource.includes(".rcs-compact-footer")
-        && cssSource.includes("padding: 12px 0 0")
+        && cssSource.includes("padding: 28px 0")
         && cssSource.includes(".rcs-footer-strip")
-        && cssSource.includes("min-height: 72px")
-        && cssSource.includes("gap: 14px")
+        && cssSource.includes("grid-template-columns: 104px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr)")
         && cssSource.includes(".rcs-footer-bottom")
-        && cssSource.includes("padding: 8px 0")
+        && cssSource.includes(".rcs-footer-tagline")
         && cssSource.includes("border-top: 1px solid rgba(255, 255, 255, 0.18)")
         && !cssSource.includes(".rcs-footer-subscribe"),
-    "Footer CSS should enforce a slim minimal footer height"
+    "Footer should use readable responsive columns rather than a compressed row"
 );
+
+assert(footerSource.includes('Bringing class to cuisine') && !footerSource.includes('this.pages.slice(0, 4)'),
+    'Footer should display the requested tagline and not truncate its page links');
+assert(!fs.readFileSync(path.join(root, 'resources/js/components/frontend/home/SliderComponent.vue'), 'utf8').includes('Bringing class to cuisine'),
+    'The tagline belongs at the bottom, not over the hero');
 
 assert(
     popularSource.includes("text-2xl")

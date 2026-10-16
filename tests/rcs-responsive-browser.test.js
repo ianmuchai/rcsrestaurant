@@ -34,7 +34,7 @@ const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, G
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
  'frontendSetting/lists': { theme_footer_logo: '/images/theme/theme-favicon-logo.png', site_copyright: "RC's Restaurant", social_media_instagram: 'https://instagram.com' },
- 'frontendPage/lists': ['About Us', 'Privacy Policy', 'Terms & Conditions', 'Contact Us'].map((title, id) => ({ id, title, slug: 'page-' + id }))
+ 'frontendPage/lists': ['About Us', 'Privacy Policy', 'Terms & Conditions', 'Contact Us', 'Delivery Policy', 'Refund Policy'].map((title, id) => ({ id, title, slug: 'page-' + id }))
 }, dispatch: (action, payload) => {
  if (action === 'googleLogin') {
    window.lastGooglePayload = payload;
@@ -107,7 +107,7 @@ async function main() {
         if (!process.env.RCS_CHECK_VIDEO) {
             await page.route('https://videos.pexels.com/**', route => route.abort());
         }
-        for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
+        for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }, { width: 1280, height: 650 }, { width: 1440, height: 900 }]) {
             await page.setViewportSize(viewport);
             await page.goto('http://127.0.0.1:' + server.address().port);
             await page.waitForSelector('.rcs-collection');
@@ -178,10 +178,23 @@ async function main() {
                 assert.strictEqual(await page.getByRole('link', { name: 'Download app', exact: true }).getAttribute('href'), '/install-app');
             } else {
                 assert(dimensions.hero.height <= viewport.height, 'Desktop slider must render one slide at a time');
-                assert(dimensions.footer.height < 180, 'Desktop footer must remain compact');
+                assert(dimensions.footer.height < 380, 'Expanded desktop footer must not fill the screen');
             }
             for (const name of ['Android', 'iOS']) {
                 assert.strictEqual(await page.locator('.rcs-footer-download-button').filter({ hasText: name }).getAttribute('href'), '/install-app');
+            }
+            assert.strictEqual(await page.locator('.rcs-footer-tagline').innerText(), 'Bringing class to cuisine');
+            assert.strictEqual(await page.locator('.rcs-footer-quicklinks a').count(), 8, 'Display all six configured page links plus Menu and Offers');
+            assert.strictEqual(await page.locator('.rcs-footer-quicklinks a').filter({ hasText: 'Refund Policy' }).getAttribute('href'), '/page/page-5');
+            const overlaps = (a, b) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+            assert(!overlaps(dimensions.order, dimensions.logo) && !overlaps(dimensions.order, dimensions.heroLinks), 'Hero navigation and logo must not cover Order Now');
+            const pauseBox = await page.locator('.rcs-hero-motion-toggle').boundingBox();
+            const contactsBox = await page.locator('.rcs-floating-actions').boundingBox();
+            assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (viewport.width < 1024 ? 15 : 17), 'Hero navigation should be easy to read');
+            for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
+                const box = await page.locator(selector).boundingBox();
+                assert(viewport.width - box.x - box.width <= 20, selector + ' must align on the right');
             }
             if ([390, 1440].includes(viewport.width)) {
                 await page.locator('.menu-slides').scrollIntoViewIfNeeded();
