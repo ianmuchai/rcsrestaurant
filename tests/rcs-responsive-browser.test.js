@@ -154,7 +154,7 @@ async function main() {
             assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: /^ORDERS$/ }).getAttribute('href'), '/my-orders');
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']);
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Each single-word label must fit without clipping');
-            assert(dimensions.logo.width <= (viewport.width < 1024 ? 91 : 139), 'Hero logo should be about 20 percent smaller');
+            assert(dimensions.logo.width <= (viewport.width < 1024 ? 73 : 113), 'Hero logo should use the newly reduced size');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Georgia')), 'Hero links should use the approved elegant serif treatment');
             const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
             await page.evaluate(() => scrollTo(0, 500));
@@ -195,10 +195,11 @@ async function main() {
             const pauseBox = await page.locator('.rcs-hero-motion-toggle').boundingBox();
             const contactsBox = await page.locator('.rcs-floating-actions').boundingBox();
             assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
+            assert(!overlaps(dimensions.heroLinks, contactsBox), 'Reserve space beside hero links for the left-hand controls');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (viewport.width < 1024 ? 15 : 17), 'Hero navigation should be easy to read');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
                 const box = await page.locator(selector).boundingBox();
-                assert(viewport.width - box.x - box.width <= 20, selector + ' must align on the right');
+                assert(box.x >= 0 && box.x <= 20, selector + ' must align on the left');
             }
             if ([390, 1440].includes(viewport.width)) {
                 await page.locator('.menu-slides').scrollIntoViewIfNeeded();

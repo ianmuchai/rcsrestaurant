@@ -24,7 +24,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'FEEDBACK']);
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Production labels must fit on narrow phones');
             const logo = await page.locator('.rcs-hero-centered-logo').boundingBox();
-            assert(logo.width <= (viewport.width < 1024 ? 91 : 139), 'Production hero must use the smaller logo');
+            assert(logo.width <= (viewport.width < 1024 ? 73 : 113), 'Production hero must use the newly reduced logo');
+            for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
+                const control = await page.locator(selector).boundingBox();
+                assert(control.x >= 0 && control.x <= 20, 'Production controls must sit on the left: ' + selector);
+            }
             assert.strictEqual(await page.locator('.rcs-footer-tagline').innerText(), 'Bringing class to cuisine');
             assert.strictEqual(await page.locator('.rcs-front-video-hero .rcs-footer-tagline').count(), 0);
             assert.strictEqual(await page.locator('.rcs-footer-quicklinks a').filter({ hasText: /^Menu$/ }).getAttribute('href'), '/menu');

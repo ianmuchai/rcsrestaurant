@@ -237,7 +237,7 @@ assert(
         && cssSource.includes(".rcs-hero-menu-button")
         && cssSource.includes("position: fixed")
         && cssSource.includes("top: 74px")
-        && cssSource.includes("right: 20px")
+        && cssSource.includes("left: 18px")
         && cssSource.includes("width: 72px")
         && cssSource.includes("background: #565B60")
         && cssSource.includes("background: #41464B")
@@ -250,12 +250,20 @@ assert(
         && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")
         && !cssSource.includes("background: linear-gradient(135deg, #53ab43, #fbb13c)")
         && cssSource.includes(".rcs-floating-actions")
-        && cssSource.includes("right: 18px")
+        && cssSource.includes("right: auto")
         && cssSource.includes("bottom: 124px")
         && cssSource.includes("flex-direction: column")
         && cssSource.includes("transform: none")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the centered hero logo, order button, fixed charcoal-grey menu button, and lower-right vertical contact icons"
+    "CSS should style the hero logo, order button, fixed charcoal-grey menu button, and lower-left vertical contact icons"
 );
+
+const cssRules = require('postcss').parse(cssSource);
+for (const selector of ['.rcs-hero-menu-button', '.rcs-floating-actions', '.rcs-hero-motion-toggle']) {
+    const rule = cssRules.nodes.find(node => node.type === 'rule' && node.selector === selector);
+    const declarations = Object.fromEntries(rule.nodes.filter(node => node.type === 'decl').map(node => [node.prop, node.value]));
+    assert.strictEqual(declarations.left, '18px', selector + ' must be physically left-aligned');
+    assert.strictEqual(declarations.right, 'auto', selector + ' must not retain a right anchor');
+}
 
 console.log("RC's home video hero contract passed");
