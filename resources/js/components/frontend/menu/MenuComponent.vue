@@ -96,10 +96,11 @@ export default {
         this.loading.isActive = true;
         this.$store.dispatch("frontendItemCategory/lists", this.categoryProps.search).then((res) => {
             this.loading.isActive = false;
+            this.categoryShow();
         }).catch((err) => {
             this.loading.isActive = false;
+            this.categoryShow();
         });
-        this.categoryShow();
     },
     methods: {
         itemTypeSet: function (e) {
@@ -109,6 +110,14 @@ export default {
             this.itemProps.type = null;
         },
         categoryShow: function () {
+            const selected = typeof this.$route.query.s === 'string' ? this.$route.query.s.trim() : '';
+            if (!selected) {
+                const firstCategory = this.categories.find(category => category.slug);
+                if (firstCategory) {
+                    return this.$router.replace({ name: 'frontend.menu', query: { ...this.$route.query, s: firstCategory.slug } });
+                }
+                return;
+            }
             if (typeof this.$route.query.s !== "undefined" && this.$route.query.s !== "") {
                 this.loading.isActive = true;
                 this.$store.dispatch("frontendItemCategory/show", {

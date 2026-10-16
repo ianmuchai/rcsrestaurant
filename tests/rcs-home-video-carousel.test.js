@@ -60,10 +60,10 @@ assert(
 
 assert(
     sliderSource.includes("autoplay") && sliderSource.includes("playsinline") && sliderSource.includes("muted") && sliderSource.includes("loop")
-        && sliderSource.includes('preload="auto"')
+        && sliderSource.includes(":preload=\"index === 0 ? 'auto' : 'metadata'\"")
         && sliderSource.includes("@canplay=\"playVideo\"")
         && sliderSource.includes("@loadeddata=\"playVideo\""),
-    "Hero videos should autoplay silently, loop, eagerly load, and retry playback when media is ready"
+    "Hero videos should autoplay silently, loop, prioritize the first video and retry playback when media is ready"
 );
 
 assert(
@@ -108,8 +108,8 @@ assert(
 );
 
 assert(
-    !sliderSource.includes("tel:+254712878787") && !sliderSource.includes("rcs-hero-copy") && !sliderSource.includes("rcs-hero-actions"),
-    "Hero should only keep the centered logo and order button, with call actions moved to floating controls"
+    !sliderSource.includes("tel:+254712878787") && sliderSource.includes("rcs-hero-page-links") && sliderSource.includes("rcs-hero-introduction"),
+    "Hero should retain the logo and order button with editorial navigation, while call actions stay in floating controls"
 );
 
 assert(
@@ -216,22 +216,22 @@ assert(
     cssSource.includes(".rcs-hero-brand-overlay")
         && cssSource.includes(".rcs-hero-brand-stack")
         && cssSource.includes(".rcs-hero-order-button")
-        && cssSource.includes("width: min(78vw, 310px)")
+        && cssSource.includes("grid-template-columns: minmax(0, 1fr) 240px")
         && cssSource.includes("margin-left: auto")
         && cssSource.includes("margin-right: auto")
         && cssSource.includes("align-self: center")
         && cssSource.includes("text-align: center")
-        && cssSource.includes("gap: 34px")
-        && cssSource.includes("transform: translateY(34px)")
+        && cssSource.includes("gap: 26px")
+        && cssSource.includes(".rcs-hero-page-links")
         && cssSource.includes("align-items: center")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
         && cssSource.includes("width: clamp(132px, 15vw, 172px)")
         && cssSource.includes("min-width: 212px")
         && cssSource.includes("min-height: 56px")
-        && cssSource.includes("border-radius: 14px")
+        && cssSource.includes("border-radius: 6px")
         && cssSource.includes("font-size: 15px")
         && cssSource.includes("font-weight: 700")
-        && cssSource.includes("letter-spacing: 0.01em")
+        && cssSource.includes("letter-spacing: 0")
         && cssSource.includes("text-transform: none")
         && cssSource.includes(".rcs-hero-menu-button")
         && cssSource.includes("position: fixed")

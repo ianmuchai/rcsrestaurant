@@ -1,11 +1,10 @@
 <template>
-    <LoadingComponent :props="loading" />
     <footer class="footer-part rcs-compact-footer">
         <div class="container">
             <div class="rcs-footer-strip">
                 <div class="rcs-footer-brand">
                     <router-link :to="{ name: 'frontend.home' }">
-                        <img class="rcs-footer-logo" :src="setting.theme_footer_logo" alt="logo">
+                        <img class="rcs-footer-logo" :src="setting.theme_footer_logo || '/images/theme/theme-favicon-logo.png'" alt="RC's logo">
                     </router-link>
                 </div>
                 <nav v-if="footerPages.length > 0" class="rcs-footer-quicklinks">
@@ -63,11 +62,9 @@
 <script>
 import statusEnum from "../../../enums/modules/statusEnum";
 import menuSectionEnum from "../../../enums/modules/menuSectionEnum";
-import LoadingComponent from "../../frontend/components/LoadingComponent";
 
 export default {
     name: "FrontendFooterComponent",
-    components: { LoadingComponent },
     data() {
         return {
             loading: {

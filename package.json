@@ -4,6 +4,7 @@
         "node": "24.x"
     },
     "scripts": {
+        "preview": "node scripts/preview.js",
         "dev": "npm run development",
         "development": "mix",
         "watch": "mix watch",

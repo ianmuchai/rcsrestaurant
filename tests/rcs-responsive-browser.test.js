@@ -21,13 +21,15 @@ import Slider from './resources/js/components/frontend/home/SliderComponent.vue'
 import Items from './resources/js/components/frontend/components/ItemComponent.vue';
 import Category from './resources/js/components/frontend/components/CategoryComponent.vue';
 import GoogleAuth from './resources/js/components/frontend/auth/GoogleAuthComponent.vue';
+import Collections from './resources/js/components/frontend/home/MenuCollectionsComponent.vue';
+import QuickActions from './resources/js/components/layouts/frontend/FrontendQuickActionsComponent.vue';
 import categoryDesignEnum from './resources/js/enums/modules/categoryDesignEnum';
 import itemDesignEnum from './resources/js/enums/modules/itemDesignEnum';
-const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page'];
-const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : '/' + name.split('.').pop(), component: { template: '<div />' } })) });
-const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth },
+const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page', 'frontend.myOrder'];
+const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : name === 'frontend.page' ? '/page/:slug' : name === 'frontend.myOrder' ? '/my-orders' : '/' + name.split('.').pop(), meta: { isFrontend: true }, component: { template: '<div />' } })) });
+const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth, Collections, QuickActions },
   data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 1,250.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
-  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><section class="rcs-featured-glass-section"><div class="container"><div class="rcs-featured-glass-panel"><h2 class="rcs-featured-title">Featured Items</h2><div class="rcs-featured-items-grid"><Items :items="items" :design="design" :type="null" /></div></div></div></section><Footer /><Mobile /></div>'
+  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><Collections :categories="categories" /><Footer /><Mobile /><QuickActions /></div>'
 });
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
@@ -108,8 +110,13 @@ async function main() {
         for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
             await page.setViewportSize(viewport);
             await page.goto('http://127.0.0.1:' + server.address().port);
-            await page.waitForSelector('.product-card-grid');
+            await page.waitForSelector('.rcs-collection');
             await page.evaluate(() => document.fonts.ready);
+            for (const image of await page.locator('.rcs-collection img').all()) {
+                await image.scrollIntoViewIfNeeded();
+                await image.evaluate(image => image.decode());
+            }
+            await page.evaluate(() => scrollTo(0, 0));
             if (process.env.RCS_CHECK_VIDEO && viewport.width === 390) {
                 await page.waitForFunction(() => {
                     const video = document.querySelector('.swiper-slide-active video');
@@ -119,16 +126,31 @@ async function main() {
             }
             const dimensions = await page.evaluate(() => {
                 const rect = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, right: r.right, bottom: r.bottom }; };
-                const overflow = [...document.querySelectorAll('.product-card-grid-title, .product-card-grid-cart-btn, .product-card-grid-price-current')].filter(el => {
-                    const child = el.getBoundingClientRect(), card = el.closest('.product-card-grid').getBoundingClientRect();
+                const overflow = [...document.querySelectorAll('.rcs-collection-copy h3, .rcs-collection-copy p, .rcs-collection-action')].filter(el => {
+                    const child = el.getBoundingClientRect(), card = el.closest('.rcs-collection').getBoundingClientRect();
                     return child.right > card.right + 1 || child.left < card.left - 1 || child.bottom > card.bottom + 1;
                 }).length;
                 const headerStyle = getComputedStyle(document.querySelector('.rcs-mobile-topbar'));
-                return { width: document.documentElement.scrollWidth, header: rect('.rcs-mobile-topbar'), headerBackground: headerStyle.backgroundColor, headerBlur: headerStyle.backdropFilter, hero: rect('.rcs-plain-video-carousel'), logo: rect('.rcs-hero-centered-logo'), order: rect('.rcs-hero-order-button'), footer: rect('.rcs-compact-footer'), overflow };
+                return { width: document.documentElement.scrollWidth, header: rect('.rcs-mobile-topbar'), headerBackground: headerStyle.backgroundColor, headerBlur: headerStyle.backdropFilter, hero: rect('.rcs-plain-video-carousel'), logo: rect('.rcs-hero-centered-logo'), order: rect('.rcs-hero-order-button'), heroLinks: rect('.rcs-hero-page-links'), footer: rect('.rcs-compact-footer'), overflow };
             });
             assert(dimensions.width <= viewport.width + 1, 'Page must not scroll horizontally: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.order.y, 'Logo and order button must have clear separation');
+            assert.strictEqual(await page.locator('.rcs-hero-introduction h1').evaluate(el => getComputedStyle(el).color), 'rgb(255, 255, 255)', 'Hero heading must remain high-contrast over video');
+            assert(dimensions.heroLinks.y >= dimensions.hero.y + 48 && dimensions.heroLinks.bottom < dimensions.hero.bottom, 'Hero links must fit inside the video area');
+            assert.strictEqual(await page.locator('.rcs-collection').count(), 4);
+            assert(await page.locator('.rcs-collection img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0)), 'All collection food images must load');
+            await page.getByRole('button', { name: 'Pause background videos' }).click();
+            await page.getByRole('button', { name: 'Play background videos' }).waitFor();
+            assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Pause must stop carousel motion');
+            await page.getByRole('button', { name: 'Play background videos' }).click();
+            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: 'Our menu' }).getAttribute('href'), '/menu');
+            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: 'Track your order' }).getAttribute('href'), '/my-orders');
+            const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
+            await page.evaluate(() => scrollTo(0, 500));
+            const fixedAfter = await page.locator('.rcs-floating-actions').boundingBox();
+            assert(Math.abs(fixedBefore.y - fixedAfter.y) <= 1, 'Floating contact controls must remain visible on scroll');
+            await page.evaluate(() => scrollTo(0, 0));
             if (viewport.width < 1024) {
                 assert(dimensions.header.height <= 49, 'Mobile header must be compact');
                 assert.strictEqual(dimensions.headerBackground, 'rgba(255, 255, 255, 0.88)', 'Header should provide strong contrast over the video');
@@ -180,16 +202,26 @@ async function main() {
                     }, released, { timeout: 3000 });
                 }
                 await session.detach();
-                const target = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y).closest('a')?.getAttribute('href'), { x, y });
-                assert(target, 'A category should be tappable after swiping');
-                await page.touchscreen.tap(x, y);
-                await page.waitForURL('**' + target);
+                const target = await page.locator('.menu-slides a').evaluateAll(links => {
+                    const link = links.find(link => { const box = link.getBoundingClientRect(); return box.left >= 20 && box.right < innerWidth - 80; });
+                    if (!link) return null;
+                    const box = link.getBoundingClientRect();
+                    return { href: link.getAttribute('href'), x: box.x + box.width / 2, y: box.y + box.height / 2 };
+                });
+                assert(target, 'A visible category should be tappable after swiping');
+                await page.touchscreen.tap(target.x, target.y);
+                await page.waitForURL('**' + target.href);
                 console.log('Category touch left/right, autoplay resume and tap passed:', viewport.width);
                 await page.evaluate(() => scrollTo(0, 0));
             }
             await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-responsive-' + viewport.width + '.png'), fullPage: true });
             console.log('Responsive layout passed:', viewport.width, 'header', dimensions.header.height, 'hero', dimensions.hero.height, 'footer', dimensions.footer.height);
         }
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto('http://127.0.0.1:' + server.address().port);
+        await page.getByRole('button', { name: 'Play background videos' }).waitFor();
+        assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Reduced motion must disable background autoplay');
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.setViewportSize({ width: 390, height: 844 });
         const googleTestUrl = 'http://127.0.0.1:' + server.address().port + '/?google=1';
         await page.goto(googleTestUrl);

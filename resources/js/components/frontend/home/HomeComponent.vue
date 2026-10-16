@@ -1,6 +1,4 @@
 <template>
-    <LoadingComponent :props="loading" />
-
     <!--========BANNER PART START===========-->
     <SliderComponent />
     <!--========BANNER PART END=============-->
@@ -10,7 +8,7 @@
     <!--========TRACK PART END=============-->
 
     <!--========Category PART START=========-->
-    <section v-if="categories.length > 0" class="mb-12">
+    <section v-if="categories.length > 0" class="mb-12" :aria-busy="loading.isActive">
         <div class="container">
             <div class="flex items-center justify-between gap-2 mb-6 mt-4">
                 <h2 class="text-2xl font-semibold capitalize">{{ $t("label.our_menu") }}</h2>
@@ -26,28 +24,21 @@
     </section>
     <!--========Category PART END===========-->
 
-    <!--========FEATURE PART START=========-->
-    <FeaturedItemComponent />
-    <!--========FEATURE PART END=========-->
+    <MenuCollectionsComponent :categories="categories" />
 
     <!--========OFFER PART START=========-->
     <OfferComponent :limit="limit" />
     <!--========OFFER PART START=========-->
 
-    <!--========POPULAR PART START=========-->
-    <PopularItemComponent />
-    <!--========POPULAR PART START=========-->
 </template>
 
 <script>
 import SliderComponent from "../../frontend/home/SliderComponent";
 import CategoryComponent from "../components/CategoryComponent";
-import FeaturedItemComponent from "../home/FeaturedItemComponent";
-import PopularItemComponent from "../home/PopularItemComponent";
+import MenuCollectionsComponent from "./MenuCollectionsComponent";
 import OfferComponent from "../components/OfferComponent";
 import categoryDesignEnum from "../../../enums/modules/categoryDesignEnum";
 import statusEnum from "../../../enums/modules/statusEnum";
-import LoadingComponent from "../components/LoadingComponent";
 import TrackOrderComponent from "./TrackOrderComponent";
 
 export default {
@@ -56,10 +47,8 @@ export default {
         TrackOrderComponent,
         CategoryComponent,
         SliderComponent,
-        FeaturedItemComponent,
-        PopularItemComponent,
-        OfferComponent,
-        LoadingComponent
+        MenuCollectionsComponent,
+        OfferComponent
     },
     data() {
         return {

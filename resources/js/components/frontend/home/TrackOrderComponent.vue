@@ -1,6 +1,4 @@
 <template>
-    <LoadingComponent :props="loading" />
-
     <div v-if="logged && activeOrders.length > 0"
         class="xst:rounded-t-2xl xst:fixed xst:bottom-12 xst:w-full xst:z-10 bg-[#FFEDF4] sm:bg-[#FF3B8E]">
         <div class="relative w-full lg:w-[930px] mx-auto flex items-center gap-4 py-2.5 sm:px-10 px-4 xst:pb-16">
@@ -30,12 +28,10 @@
 </template>
 
 <script>
-import LoadingComponent from "../../frontend/components/LoadingComponent";
 import orderStatusEnum from "../../../enums/modules/orderStatusEnum";
 
 export default {
     name: "TrackOrderComponent",
-    components: { LoadingComponent },
     data() {
         return {
             loading: {

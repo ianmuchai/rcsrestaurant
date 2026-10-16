@@ -356,7 +356,6 @@ export default {
 
         this.currentRoute = this.$route.path;
         this.syncPwaInstalledState();
-        this.loading.isActive = true;
         this.orderPermissionCheck();
         this.$store.dispatch('frontendSetting/lists').then(res => {
             this.defaultBranch = res.data.data.site_default_branch;
