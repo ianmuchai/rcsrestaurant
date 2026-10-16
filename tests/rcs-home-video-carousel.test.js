@@ -109,8 +109,8 @@ assert(
 );
 
 assert(
-    !sliderSource.includes("tel:+254712878787") && sliderSource.includes("rcs-hero-page-links") && sliderSource.includes("rcs-hero-introduction"),
-    "Hero should retain the logo and order button with editorial navigation, while call actions stay in floating controls"
+    !sliderSource.includes("tel:+254712878787") && sliderSource.includes("rcs-hero-page-links") && !sliderSource.includes("rcs-hero-introduction"),
+    "Hero should keep only the logo, order button and navigation without marketing sentences"
 );
 
 assert(

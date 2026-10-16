@@ -18,14 +18,17 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
     const source = fs.readFileSync(base + 'MenuCollectionsComponent.vue', 'utf8');
     const { descriptor } = parse(source);
     const { default: component } = await import('data:text/javascript;base64,' + Buffer.from(descriptor.script.content).toString('base64'));
-    const state = { ...component.data(), categories: [{ slug: 'breakfast-specials', name: 'Breakfast' }, { slug: 'teas-coffee', name: 'Teas & Coffee' }] };
+    const state = { ...component.data(), categories: [{ slug: 'steak', name: 'Steak' }, { slug: 'rcs-signatures', name: "RC's Signatures" }, { slug: 'teas-coffee', name: 'Teas & Coffee' }] };
     const collections = component.computed.collections.call(state);
-    assert.strictEqual(collections.length, 4);
-    assert.strictEqual(collections[0].to.query.s, 'breakfast-specials');
+    assert.strictEqual(collections.length, 2, 'Replace the four verbose blocks with two designed posters');
+    assert.strictEqual(collections[0].to.query.s, 'rcs-signatures');
+    assert(!source.includes('collection.description') && !source.includes('rcs-visit-strip'));
+    assert(source.includes('rcs-promo-poster') && source.includes('1536') && source.includes('1024'));
     assert.strictEqual(collections.find(x => x.key === 'coffee').to.query.s, 'teas-coffee');
     for (const collection of collections) {
         assert.strictEqual(collection.to.name, 'frontend.menu');
         assert(fs.existsSync('public' + collection.image), 'Every collection needs a real local food image');
+        assert(fs.statSync('public' + collection.image).size < 250 * 1024, 'Poster images must remain lightweight');
     }
     const fallback = component.computed.collections.call({ ...state, categories: [] });
     assert(fallback.every(x => !x.to.query), 'Unavailable categories must fall back to the complete menu');

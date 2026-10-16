@@ -126,7 +126,7 @@ async function main() {
             }
             const dimensions = await page.evaluate(() => {
                 const rect = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, right: r.right, bottom: r.bottom }; };
-                const overflow = [...document.querySelectorAll('.rcs-collection-copy h3, .rcs-collection-copy p, .rcs-collection-action')].filter(el => {
+                const overflow = [...document.querySelectorAll('.rcs-promo-poster')].filter(el => {
                     const child = el.getBoundingClientRect(), card = el.closest('.rcs-collection').getBoundingClientRect();
                     return child.right > card.right + 1 || child.left < card.left - 1 || child.bottom > card.bottom + 1;
                 }).length;
@@ -142,7 +142,9 @@ async function main() {
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0, 'Remove the visible restaurant heading');
             assert(dimensions.heroLinks.y >= dimensions.hero.y + 48 && dimensions.heroLinks.bottom < dimensions.hero.bottom, 'Hero links must fit inside the video area');
-            assert.strictEqual(await page.locator('.rcs-collection').count(), 4);
+            assert.strictEqual(await page.locator('.rcs-collection').count(), 2);
+            assert.strictEqual(await page.locator('.rcs-menu-collections p, .rcs-front-video-hero p').count(), 0, 'Homepage should not repeat marketing sentences');
+            assert(await page.locator('.rcs-promo-poster').evaluateAll(images => images.every(image => Math.abs(image.width / image.height - 1.5) < 0.02 && getComputedStyle(image).objectFit === 'contain')), 'Show complete posters without cropping their text');
             assert(await page.locator('.rcs-collection img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0)), 'All collection food images must load');
             await page.getByRole('button', { name: 'Pause background videos' }).click();
             await page.getByRole('button', { name: 'Play background videos' }).waitFor();

@@ -25,9 +25,6 @@
                     <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
                     <span>Order Now</span>
                 </router-link>
-                <div class="rcs-hero-introduction">
-                    <p>Authentic meals. Everyday moments.</p>
-                </div>
             </div>
             <div class="rcs-hero-link-panel">
                 <router-link :to="{ name: 'frontend.home' }" class="rcs-hero-centered-logo" aria-label="RC's home">
