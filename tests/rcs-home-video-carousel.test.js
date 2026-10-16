@@ -238,7 +238,8 @@ assert(
         && cssSource.includes("top: 74px")
         && cssSource.includes("right: 20px")
         && cssSource.includes("width: 72px")
-        && cssSource.includes("background: #F97316")
+        && cssSource.includes("background: #565B60")
+        && cssSource.includes("background: #41464B")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
         && cssSource.includes("font-size: 11px")
         && cssSource.includes(".rcs-floating-action-directions")
@@ -253,7 +254,7 @@ assert(
         && cssSource.includes("flex-direction: column")
         && cssSource.includes("transform: none")
         && cssSource.includes(".rcs-floating-action-whatsapp"),
-    "CSS should style the larger centered hero logo, lower rounded-square order button, fixed orange menu button, and lower-right vertical contact icons"
+    "CSS should style the centered hero logo, order button, fixed charcoal-grey menu button, and lower-right vertical contact icons"
 );
 
 console.log("RC's home video hero contract passed");
