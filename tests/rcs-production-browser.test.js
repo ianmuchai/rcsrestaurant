@@ -6,7 +6,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
 (async () => {
     const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
     try {
-        for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
+        for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) {
             const page = await browser.newPage({ viewport });
             const heldRequests = [];
             // Keep backend requests pending to prove the built homepage remains usable.
@@ -21,6 +21,10 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0);
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             assert.strictEqual(await page.locator('.rcs-hero-link-panel .rcs-hero-centered-logo').count(), 1);
+            assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'FEEDBACK']);
+            assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Production labels must fit on narrow phones');
+            const logo = await page.locator('.rcs-hero-centered-logo').boundingBox();
+            assert(logo.width <= (viewport.width < 1024 ? 91 : 139), 'Production hero must use the smaller logo');
             assert.strictEqual(await page.locator('.rcs-footer-tagline').innerText(), 'Bringing class to cuisine');
             assert.strictEqual(await page.locator('.rcs-front-video-hero .rcs-footer-tagline').count(), 0);
             assert.strictEqual(await page.locator('.rcs-footer-quicklinks a').filter({ hasText: /^Menu$/ }).getAttribute('href'), '/menu');

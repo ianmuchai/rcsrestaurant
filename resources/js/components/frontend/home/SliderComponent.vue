@@ -32,30 +32,30 @@
                 </router-link>
             <nav class="rcs-hero-page-links" aria-label="Explore RC's">
                 <router-link :to="{ name: 'frontend.menu' }">
-                    <i class="fa-solid fa-utensils" aria-hidden="true"></i><span>Our menu</span>
+                    <i class="fa-solid fa-utensils" aria-hidden="true"></i><span>MENU</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </router-link>
                 <router-link :to="{ name: 'frontend.offers' }">
-                    <i class="fa-solid fa-tag" aria-hidden="true"></i><span>Offers</span>
+                    <i class="fa-solid fa-tag" aria-hidden="true"></i><span>OFFERS</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </router-link>
                 <a href="https://www.google.com/maps/search/?api=1&amp;query=RC%27s%20Moon%20Palace%20Hotel%20General%20Waruingi%20Rd%20Nairobi"
                     target="_blank" rel="noopener noreferrer">
-                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Find us</span>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>LOCATION</span>
                     <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                 </a>
                 <router-link :to="{ name: 'frontend.myOrder' }">
-                    <i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Track your order</span>
+                    <i class="fa-solid fa-receipt" aria-hidden="true"></i><span>ORDERS</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </router-link>
                 <router-link v-for="page in heroPages" :key="page.slug"
                     :to="{ name: 'frontend.page', params: { slug: page.slug } }">
-                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>{{ page.title }}</span>
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>ABOUT</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </router-link>
                 <a href="https://wa.me/254712878787?text=Hello%20RC%27s%2C%20I%20would%20like%20to%20share%20feedback."
                     target="_blank" rel="noopener noreferrer">
-                    <i class="fa-regular fa-comment" aria-hidden="true"></i><span>Share feedback</span>
+                    <i class="fa-regular fa-comment" aria-hidden="true"></i><span>FEEDBACK</span>
                     <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                 </a>
             </nav>

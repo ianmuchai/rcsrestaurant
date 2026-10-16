@@ -150,8 +150,12 @@ async function main() {
             await page.getByRole('button', { name: 'Play background videos' }).waitFor();
             assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Pause must stop carousel motion');
             await page.getByRole('button', { name: 'Play background videos' }).click();
-            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: 'Our menu' }).getAttribute('href'), '/menu');
-            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: 'Track your order' }).getAttribute('href'), '/my-orders');
+            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: /^MENU$/ }).getAttribute('href'), '/menu');
+            assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: /^ORDERS$/ }).getAttribute('href'), '/my-orders');
+            assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']);
+            assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Each single-word label must fit without clipping');
+            assert(dimensions.logo.width <= (viewport.width < 1024 ? 91 : 139), 'Hero logo should be about 20 percent smaller');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Georgia')), 'Hero links should use the approved elegant serif treatment');
             const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
             await page.evaluate(() => scrollTo(0, 500));
             const fixedAfter = await page.locator('.rcs-floating-actions').boundingBox();

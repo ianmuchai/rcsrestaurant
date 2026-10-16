@@ -35,6 +35,9 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
     const slider = fs.readFileSync(base + 'SliderComponent.vue', 'utf8');
     assert(slider.includes('<video') && slider.includes('playsinline') && !slider.includes(':poster='));
     assert(slider.includes('rcs-hero-page-links') && slider.includes('<h1'));
+    for (const label of ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']) {
+        assert(slider.includes('<span>' + label + '</span>'), 'Hero links should have single-word uppercase labels: ' + label);
+    }
     assert(slider.includes('rcs-hero-link-panel'), 'Logo and page links need their own section');
     assert(slider.includes('<span>Order Now</span>') && !slider.includes('<span>Order Online</span>'));
     assert(!slider.includes('<h1>RC\'s Restaurant</h1>'), 'The visible restaurant heading must be removed');
