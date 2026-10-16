@@ -103,7 +103,8 @@ assert(
         && !sliderSource.includes("setting.theme_logo")
         && sliderSource.includes("rcs-hero-centered-logo")
         && sliderSource.includes("rcs-hero-brand-stack")
-        && sliderSource.indexOf("rcs-hero-centered-logo") < sliderSource.indexOf("rcs-hero-order-button"),
+        && sliderSource.indexOf("rcs-hero-link-panel") < sliderSource.indexOf("rcs-hero-centered-logo")
+        && sliderSource.indexOf("rcs-hero-centered-logo") < sliderSource.indexOf("rcs-hero-page-links"),
     "Hero should use the current cache-busted RC's logo asset directly, so stale backend logo settings cannot render the old mark"
 );
 
@@ -216,18 +217,18 @@ assert(
     cssSource.includes(".rcs-hero-brand-overlay")
         && cssSource.includes(".rcs-hero-brand-stack")
         && cssSource.includes(".rcs-hero-order-button")
-        && cssSource.includes("grid-template-columns: minmax(0, 1fr) 240px")
+        && cssSource.includes(".rcs-hero-link-panel")
         && cssSource.includes("margin-left: auto")
         && cssSource.includes("margin-right: auto")
         && cssSource.includes("align-self: center")
         && cssSource.includes("text-align: center")
-        && cssSource.includes("gap: 26px")
+        && cssSource.includes("gap: 20px")
         && cssSource.includes(".rcs-hero-page-links")
         && cssSource.includes("align-items: center")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
         && cssSource.includes("width: clamp(132px, 15vw, 172px)")
-        && cssSource.includes("min-width: 212px")
-        && cssSource.includes("min-height: 56px")
+        && cssSource.includes("min-width: 280px")
+        && cssSource.includes("min-height: 72px")
         && cssSource.includes("border-radius: 6px")
         && cssSource.includes("font-size: 15px")
         && cssSource.includes("font-weight: 700")

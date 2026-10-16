@@ -1,5 +1,6 @@
 <template>
     <section class="rcs-front-video-hero">
+        <h1 class="sr-only">RC's Restaurant</h1>
         <router-link :to="{ name: 'frontend.menu' }" class="rcs-hero-menu-button rcs-floating-action-menu"
             data-rcs-action="hero_menu_click">
             <i class="fa-solid fa-bowl-food"></i>
@@ -20,18 +21,18 @@
 
         <div class="rcs-hero-brand-overlay">
             <div class="rcs-hero-brand-stack">
+                <router-link :to="{ name: 'frontend.menu' }" class="rcs-hero-order-button" data-rcs-action="order_click">
+                    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+                    <span>Order Now</span>
+                </router-link>
+                <div class="rcs-hero-introduction">
+                    <p>Authentic meals. Everyday moments.</p>
+                </div>
+            </div>
+            <div class="rcs-hero-link-panel">
                 <router-link :to="{ name: 'frontend.home' }" class="rcs-hero-centered-logo" aria-label="RC's home">
                     <img class="rcs-hero-logo-image" :src="currentHeroLogoSrc" alt="RC's logo">
                 </router-link>
-                <div class="rcs-hero-introduction">
-                    <h1>RC's Restaurant</h1>
-                    <p>Authentic meals. Everyday moments.</p>
-                </div>
-                <router-link :to="{ name: 'frontend.menu' }" class="rcs-hero-order-button" data-rcs-action="order_click">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span>Order Online</span>
-                </router-link>
-            </div>
             <nav class="rcs-hero-page-links" aria-label="Explore RC's">
                 <router-link :to="{ name: 'frontend.menu' }">
                     <i class="fa-solid fa-utensils" aria-hidden="true"></i><span>Our menu</span>
@@ -61,6 +62,7 @@
                     <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                 </a>
             </nav>
+            </div>
         </div>
         <button type="button" class="rcs-hero-motion-toggle" @click="toggleMotion"
             :aria-label="motionPaused ? 'Play background videos' : 'Pause background videos'"

@@ -135,8 +135,12 @@ async function main() {
             });
             assert(dimensions.width <= viewport.width + 1, 'Page must not scroll horizontally: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
-            assert(dimensions.logo.bottom < dimensions.order.y, 'Logo and order button must have clear separation');
-            assert.strictEqual(await page.locator('.rcs-hero-introduction h1').evaluate(el => getComputedStyle(el).color), 'rgb(255, 255, 255)', 'Hero heading must remain high-contrast over video');
+            assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
+            assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - viewport.width / 2) < 2, 'Order Now must be centered across the full video');
+            assert(dimensions.order.width >= 240 && dimensions.order.height >= 64, 'Order Now should be larger and easy to tap');
+            assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Order Now should sit above the vertical midpoint');
+            assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
+            assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0, 'Remove the visible restaurant heading');
             assert(dimensions.heroLinks.y >= dimensions.hero.y + 48 && dimensions.heroLinks.bottom < dimensions.hero.bottom, 'Hero links must fit inside the video area');
             assert.strictEqual(await page.locator('.rcs-collection').count(), 4);
             assert(await page.locator('.rcs-collection img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0)), 'All collection food images must load');

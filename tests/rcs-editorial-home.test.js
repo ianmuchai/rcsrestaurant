@@ -32,6 +32,9 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
     const slider = fs.readFileSync(base + 'SliderComponent.vue', 'utf8');
     assert(slider.includes('<video') && slider.includes('playsinline') && !slider.includes(':poster='));
     assert(slider.includes('rcs-hero-page-links') && slider.includes('<h1'));
+    assert(slider.includes('rcs-hero-link-panel'), 'Logo and page links need their own section');
+    assert(slider.includes('<span>Order Now</span>') && !slider.includes('<span>Order Online</span>'));
+    assert(!slider.includes('<h1>RC\'s Restaurant</h1>'), 'The visible restaurant heading must be removed');
     assert(slider.includes('frontend.myOrder') && slider.includes('frontend.offers'));
     assert(slider.includes('wa.me/254712878787') && slider.includes('google.com/maps'));
     assert(!slider.includes('Careers'), 'Do not advertise pages that RC\'s does not have');
