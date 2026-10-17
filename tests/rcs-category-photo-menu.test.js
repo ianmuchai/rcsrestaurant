@@ -140,11 +140,11 @@ assert(
 
 assert(
     cssSource.includes(".rcs-menu-carousel-bleed")
-        && cssSource.includes("width: 100vw")
-        && cssSource.includes("margin-left: calc(50% - 50vw)")
-        && cssSource.includes("margin-right: calc(50% - 50vw)")
+        && !cssSource.includes("width: 100vw")
+        && !cssSource.includes("margin-left: calc(50% - 50vw)")
+        && !cssSource.includes("margin-right: calc(50% - 50vw)")
         && cssSource.includes("overflow: hidden"),
-    "Homepage category carousel should break out of the content container and span the full viewport width"
+    "Homepage carousel should use the full available width without overflowing classic desktop scrollbars"
 );
 
 console.log("RC's category food photo menu contract passed");

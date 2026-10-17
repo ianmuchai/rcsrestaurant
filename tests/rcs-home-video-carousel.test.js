@@ -192,10 +192,10 @@ assert(
         && quickActionsSource.includes("whatsappUrl")
         && quickActionsSource.includes("https://wa.me/254712878787")
         && quickActionsSource.includes("tel:+254712878787")
-        && quickActionsSource.includes("directionsUrl")
-        && quickActionsSource.includes("fa-location-dot")
+        && !quickActionsSource.includes("directionsUrl")
+        && !quickActionsSource.includes("fa-location-dot")
         && !quickActionsSource.includes("fa-location-arrow"),
-    "Floating controls should provide modern call, WhatsApp, and directions actions"
+    "Floating controls should provide call and WhatsApp without a location button"
 );
 
 assert(
@@ -243,8 +243,6 @@ assert(
         && cssSource.includes("background: #41464B")
         && cssSource.includes('font-family: "Inter", "Rubik", sans-serif')
         && cssSource.includes("font-size: 11px")
-        && cssSource.includes(".rcs-floating-action-directions")
-        && cssSource.includes("background: #E11D48")
         && cssSource.includes(".rcs-floating-action-menu")
         && !cssSource.includes(".rcs-floating-action-install")
         && !cssSource.includes("background: linear-gradient(135deg, #43ab39, #71c344)")

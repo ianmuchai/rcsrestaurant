@@ -23,14 +23,15 @@ import Category from './resources/js/components/frontend/components/CategoryComp
 import GoogleAuth from './resources/js/components/frontend/auth/GoogleAuthComponent.vue';
 import Collections from './resources/js/components/frontend/home/MenuCollectionsComponent.vue';
 import QuickActions from './resources/js/components/layouts/frontend/FrontendQuickActionsComponent.vue';
+import Install from './resources/js/components/frontend/pwa/PwaInstallComponent.vue';
 import categoryDesignEnum from './resources/js/enums/modules/categoryDesignEnum';
 import itemDesignEnum from './resources/js/enums/modules/itemDesignEnum';
 const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page', 'frontend.myOrder'];
 const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : name === 'frontend.page' ? '/page/:slug' : name === 'frontend.myOrder' ? '/my-orders' : '/' + name.split('.').pop(), meta: { isFrontend: true }, component: { template: '<div />' } })) });
-const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth, Collections, QuickActions },
+const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth, Collections, QuickActions, Install },
   data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, listDesign: itemDesignEnum.LIST, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 123,450.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', thumb: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
   computed: { cardDesign() { return this.$route.query.cards === 'list' ? this.listDesign : this.design; } },
-  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else-if="$route.query.cards" class="rcs-frontend-layout"><Mobile /><main class="container" style="padding-top: 16px"><Items :items="items" :type="null" :design="cardDesign" /></main></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><Collections :categories="categories" /><Footer /><Mobile /><QuickActions /></div>'
+  template: '<div v-if="$route.query.install" class="rcs-frontend-layout"><Mobile /><Install /></div><div v-else-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else-if="$route.query.cards" class="rcs-frontend-layout"><Mobile /><main class="container" style="padding-top: 16px"><Items :items="items" :type="null" :design="cardDesign" /></main></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><Collections :categories="categories" /><Footer /><Mobile /><QuickActions /></div>'
 });
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
@@ -87,6 +88,9 @@ async function main() {
         browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true,
             args: ['--disable-gpu', '--disable-gpu-compositing', '--disable-gpu-rasterization', '--disable-software-rasterizer', '--no-sandbox'] });
         const page = await browser.newPage({ hasTouch: true });
+        await page.addInitScript(() => {
+            if (navigator.serviceWorker) navigator.serviceWorker.register = async () => ({});
+        });
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         let googleEnabled = false;
@@ -112,6 +116,7 @@ async function main() {
             const landscape = viewport.width < 1024 && viewport.height <= 500 && viewport.width > viewport.height;
             await page.setViewportSize(viewport);
             await page.goto('http://127.0.0.1:' + server.address().port);
+            if (viewport.width >= 1024) await page.addStyleTag({ content: 'html { scrollbar-gutter: stable; overflow-y: scroll; }' });
             await page.waitForSelector('.rcs-collection');
             await page.evaluate(() => document.fonts.ready);
             for (const image of await page.locator('.rcs-collection img').all()) {
@@ -133,14 +138,14 @@ async function main() {
                     return child.right > card.right + 1 || child.left < card.left - 1 || child.bottom > card.bottom + 1;
                 }).length;
                 const headerStyle = getComputedStyle(document.querySelector('.rcs-mobile-topbar'));
-                return { width: document.documentElement.scrollWidth, header: rect('.rcs-mobile-topbar'), headerBackground: headerStyle.backgroundColor, headerBlur: headerStyle.backdropFilter, hero: rect('.rcs-plain-video-carousel'), logo: rect('.rcs-hero-centered-logo'), order: rect('.rcs-hero-order-button'), heroLinks: rect('.rcs-hero-page-links'), footer: rect('.rcs-compact-footer'), overflow };
+                return { width: document.documentElement.scrollWidth, contentWidth: document.documentElement.clientWidth, header: rect('.rcs-mobile-topbar'), headerBackground: headerStyle.backgroundColor, headerBlur: headerStyle.backdropFilter, hero: rect('.rcs-plain-video-carousel'), logo: rect('.rcs-hero-centered-logo'), order: rect('.rcs-hero-order-button'), heroLinks: rect('.rcs-hero-page-links'), footer: rect('.rcs-compact-footer'), overflow };
             });
-            assert(dimensions.width <= viewport.width + 1, 'Page must not scroll horizontally: ' + JSON.stringify({ viewport, dimensions }));
+            assert(dimensions.width <= dimensions.contentWidth + 1, 'Page must not scroll horizontally, including with a desktop scrollbar gutter: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
-            const orderCenter = landscape ? viewport.width / 4 : viewport.width / 2 - (viewport.width >= 1024 ? 40 : 0);
+            const orderCenter = landscape ? viewport.width / 4 : dimensions.hero.x + dimensions.hero.width / 2 - (viewport.width >= 1024 ? 40 : 0);
             assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - orderCenter) < 2, 'Shift Order Now slightly left on desktop while keeping mobile centered');
-            assert.strictEqual(await page.locator('.rcs-floating-action-directions').isVisible(), viewport.width < 1024, 'Only hide the floating location button on desktop');
+            assert.strictEqual(await page.locator('.rcs-floating-action-directions').count(), 0, 'Remove the floating location button from the markup');
             assert(dimensions.order.width >= (landscape || viewport.width < 360 ? 200 : viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (landscape || viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
             if (viewport.width < 1024) {
                 assert(dimensions.order.y >= viewport.height * 0.5 && dimensions.order.bottom <= viewport.height - 70, 'Mobile Order Now should sit low on screen and clear the bottom navigation');
@@ -170,9 +175,12 @@ async function main() {
             assert.strictEqual(await page.locator('.rcs-hero-page-links .fa-arrow-right, .rcs-hero-page-links .fa-arrow-up-right-from-square').count(), 0, 'Remove trailing arrows from the component markup');
             assert(dimensions.logo.y < dimensions.hero.y + (viewport.width < 1024 ? 120 : dimensions.hero.height * 0.25), 'Move the logo and link section higher in the hero');
             assert(await page.locator('.rcs-hero-page-links a').evaluateAll(links => links.every(link => {
-                const rule = getComputedStyle(link, '::after');
-                return rule.content === '""' && parseFloat(rule.width) >= 88 && parseFloat(rule.width) <= link.clientWidth * 0.56 && Math.abs(parseFloat(rule.left) - link.clientWidth / 2) < 1 && rule.height === '1px' && getComputedStyle(link).borderTopWidth === '0px';
-            })), 'Every hero underline should be a short, fine rule rather than a full-width divider');
+                const label = link.querySelector('span'), icon = link.querySelector('i');
+                const rule = getComputedStyle(label, '::after');
+                const text = label.getBoundingClientRect(), symbol = icon.getBoundingClientRect();
+                return rule.content === '""' && Math.abs(parseFloat(rule.width) - text.width) < 1 && rule.left === '0px' && rule.height === '1px' && text.left - symbol.right >= 8 && text.left - symbol.right <= 13;
+            })), 'Align close icon/text columns with underlines directly beneath each label');
+            assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => Math.abs(label.getBoundingClientRect().left - labels[0].getBoundingClientRect().left) < 1)), 'Justify all hero labels on one consistent left edge');
             const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
             await page.evaluate(() => scrollTo(0, 500));
             const fixedAfter = await page.locator('.rcs-floating-actions').boundingBox();
@@ -210,9 +218,13 @@ async function main() {
             const overlaps = (a, b) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
             assert(!overlaps(dimensions.order, dimensions.logo) && !overlaps(dimensions.order, dimensions.heroLinks), 'Hero navigation and logo must not cover Order Now');
             const pauseBox = await page.locator('.rcs-hero-motion-toggle').boundingBox();
-            const contactsBox = await page.locator('.rcs-floating-actions').boundingBox();
+            const whatsappBox = await page.locator('.rcs-floating-action-whatsapp').boundingBox();
             const menuBox = await page.locator('.rcs-hero-menu-button').boundingBox();
             const contactButton = await page.locator('.rcs-floating-action-call').boundingBox();
+            if (viewport.width < 1024) {
+                assert(Math.abs(contactButton.y - whatsappBox.y) < 1, 'Align phone and WhatsApp at the same height');
+                assert(contactButton.x <= 20 && viewport.width - whatsappBox.x - whatsappBox.width <= 20, 'Keep phone on the left and WhatsApp on the right');
+            }
             if (viewport.width < 640) {
                 assert.strictEqual(menuBox.width, 52, 'Mobile floating Menu should be compact');
                 assert.strictEqual(contactButton.width, 44, 'Mobile contact buttons should keep 44px touch targets');
@@ -228,9 +240,12 @@ async function main() {
                 const box = link.getBoundingClientRect();
                 return box.left >= 0 && box.right <= innerWidth + 1 && link.scrollWidth <= link.clientWidth + 1;
             })), 'Footer text and links must fit their columns');
-            assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
-            assert(!overlaps(dimensions.order, pauseBox) && !overlaps(dimensions.order, contactsBox), 'Order Now must not overlap floating controls');
-            assert(!overlaps(dimensions.heroLinks, contactsBox), 'Reserve space beside hero links for the left-hand controls');
+            for (const control of [contactButton, whatsappBox]) {
+                assert(!overlaps(pauseBox, control), 'Pause and contact buttons must not overlap');
+                assert(!overlaps(dimensions.order, control), 'Order Now must not overlap contact buttons');
+                assert(!overlaps(dimensions.heroLinks, control), 'Reserve space beside hero links for contact buttons');
+            }
+            assert(!overlaps(dimensions.order, pauseBox), 'Order Now must not overlap the video control');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : viewport.width < 1024 ? 26 : 28), 'Hero navigation must use the newly enlarged type sizes');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
                 const box = await page.locator(selector).boundingBox();
@@ -275,6 +290,36 @@ async function main() {
             }
             await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-responsive-' + viewport.width + '.png'), fullPage: true });
             console.log('Responsive layout passed:', viewport.width, 'header', dimensions.header.height, 'hero', dimensions.hero.height, 'footer', dimensions.footer.height);
+        }
+        for (const width of [320, 390, 1440]) {
+            await page.setViewportSize({ width, height: 844 });
+            // Mount the actual install component through its fixture route.
+            await page.goto('http://127.0.0.1:' + server.address().port + '/install-app?install=1');
+            const download = page.getByRole('button', { name: 'Download App', exact: true });
+            await download.waitFor();
+            const picture = page.locator('.rcs-pwa-share-figure img');
+            await picture.evaluate(image => image.decode());
+            assert.strictEqual(await picture.evaluate(image => image.naturalWidth), 50);
+            assert.strictEqual(await page.locator('.rcs-pwa-ios-guide li').count(), 4);
+            assert.strictEqual(await page.getByRole('button', { name: /Share Link/i }).count(), 0);
+            assert(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), 'Install page must fit the screen');
+            await download.click();
+            assert.strictEqual(await page.evaluate(() => document.activeElement.id), 'rcs-pwa-guide-title');
+            await page.evaluate(() => {
+                window.promptCalls = 0;
+                const event = new Event('beforeinstallprompt', { cancelable: true });
+                event.prompt = async () => { window.promptCalls++; };
+                event.userChoice = Promise.resolve({ outcome: 'accepted' });
+                dispatchEvent(event);
+            });
+            assert.strictEqual(await page.evaluate(() => window.promptCalls), 0, 'Never install automatically');
+            await download.click();
+            await page.waitForFunction(() => window.promptCalls === 1);
+            await page.getByRole('status').filter({ hasText: 'Finish installing' }).waitFor();
+            await page.evaluate(() => dispatchEvent(new Event('appinstalled')));
+            assert(await page.getByRole('button', { name: 'Installed', exact: true }).isDisabled());
+            await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-install-' + width + '.png'), fullPage: true });
+            console.log('Download page layout, iPhone image and explicit install passed:', width);
         }
         await page.emulateMedia({ reducedMotion: 'reduce' });
         await page.goto('http://127.0.0.1:' + server.address().port);

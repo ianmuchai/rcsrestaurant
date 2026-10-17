@@ -36,9 +36,9 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
     const styles = require('postcss').parse(fs.readFileSync('resources/css/app.css', 'utf8'));
     const heroLinkRule = styles.nodes.find(node => node.selector === '.rcs-hero-page-links a');
     assert(!heroLinkRule.nodes.some(node => node.prop === 'border-top'), 'Replace full-width hero dividers with short underlines');
-    const underline = styles.nodes.find(node => node.selector === '.rcs-hero-page-links a::after');
-    assert(underline && underline.nodes.some(node => node.prop === 'width' && node.value === '104px')
-        && underline.nodes.some(node => node.prop === 'left' && node.value === '50%'), 'Hero links need longer centered hairline underlines');
+    const underline = styles.nodes.find(node => node.selector === '.rcs-hero-page-links span::after');
+    assert(underline && underline.nodes.some(node => node.prop === 'width' && node.value === '100%')
+        && underline.nodes.some(node => node.prop === 'left' && node.value === '0'), 'Hero underlines should align with their justified text labels');
     assert(slider.includes('<video') && slider.includes('playsinline') && !slider.includes(':poster='));
     assert(slider.includes('rcs-hero-page-links') && slider.includes('<h1'));
     assert(!slider.includes('fa-arrow-right') && !slider.includes('fa-arrow-up-right-from-square'), 'Remove hero arrows from markup rather than merely hiding them');

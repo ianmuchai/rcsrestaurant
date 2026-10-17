@@ -31,10 +31,10 @@ assert.deepStrictEqual(result.errors, [], "PWA install component template should
     "rcs-pwa-install-page",
     "rcs-pwa-link-card",
     "installPageUrl",
-    "manifestUrl",
-    "serviceWorkerUrl",
+    "rcs-pwa-ios-guide",
+    "rcs-pwa-qr-links",
+    "rcs-pwa-share-figure",
     "copyLink",
-    "shareInstallPage",
     "nativeInstall",
     "beforeinstallprompt",
 ].forEach((needle) => {
@@ -43,6 +43,24 @@ assert.deepStrictEqual(result.errors, [], "PWA install component template should
         `PWA install page should include ${needle}`
     );
 });
+
+assert(componentSource.includes("Download RC's app"), "Customer heading should invite app download");
+assert(componentSource.includes('ref="installGuide" tabindex="-1"'), "Installation guide should accept focus");
+assert(componentSource.includes('role="status"'), "Install feedback should be announced");
+assert(!/navigator\.share|shareInstallPage|Open From QR|Share Link|manifestUrl|serviceWorkerUrl/.test(componentSource),
+    "Customer install page should not offer sharing or technical URL cards");
+assert(/<details[\s\S]*rcs-pwa-link-card[\s\S]*<\/details>/.test(descriptor.template.content),
+    "QR URL copy utility should be collapsed by default");
+assert.strictEqual((descriptor.template.content.match(/rcs-pwa-link-card/g) || []).length, 1,
+    "Only the public install URL should have a copy card");
+assert(descriptor.template.content.includes('<ol>'), "iPhone instructions should be ordered steps");
+for (const text of ["Safari", "Page Menu", "More", "Add to Home Screen", "Open as Web App"]) {
+    assert(descriptor.template.content.includes(text), `iPhone guide should include ${text}`);
+}
+assert(/<img\s[^>]*src="\/images\/pwa\/ios-share-button.png"[^>]*width="50"[^>]*height="60"[^>]*alt="Safari Share button: a square with an upward arrow"/s.test(componentSource),
+    "Guide should show the actual Apple Share image with dimensions and descriptive alt text");
+assert(componentSource.includes("https://support.apple.com/en-lamr/guide/iphone/iphea86e5236/ios"),
+    "Apple Share figure should link to the supplied Apple guide");
 
 const routeSource = fs.readFileSync(routePath, "utf8");
 assert(
