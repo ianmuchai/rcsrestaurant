@@ -27,7 +27,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
                 assert(order.y >= viewport.height * (landscape ? 0.5 : 0.7) && order.y + order.height <= viewport.height - 70, 'Mobile Order Now must be near the bottom, clear of the bottom bar');
             }
             const heroBounds = await page.locator('.rcs-front-video-hero').boundingBox();
-            assert(Math.abs(order.x + order.width / 2 - (landscape ? viewport.width / 4 : heroBounds.x + heroBounds.width / 2 - (viewport.width >= 1024 ? 40 : 0))) < 2, 'Keep responsive Order Now alignment');
+            assert(Math.abs(order.x + order.width / 2 - (landscape ? viewport.width / 4 : heroBounds.x + heroBounds.width / 2 - (viewport.width >= 1024 ? 64 : 0))) < 2, 'Keep responsive Order Now alignment');
             assert.strictEqual(await page.locator('.rcs-floating-action-directions').count(), 0, 'Remove the floating location button');
             if (viewport.width < 1024) {
                 const call = await page.locator('.rcs-floating-action-call').boundingBox();

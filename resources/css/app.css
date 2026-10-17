@@ -2497,7 +2497,8 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 }
 
 @media (min-width: 1024px) {
-    .rcs-hero-brand-overlay .rcs-hero-brand-stack { left: calc(50% - 40px); }
+    .rcs-hero-brand-overlay .rcs-hero-brand-stack { left: calc(50% - 64px); top: calc(39% + 16px); }
+    .rcs-hero-link-panel { transform: translate(-24px, calc(-50% + 16px)); }
 }
 
 @media (max-width: 359px) {

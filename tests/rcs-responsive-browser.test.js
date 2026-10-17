@@ -143,7 +143,7 @@ async function main() {
             assert(dimensions.width <= dimensions.contentWidth + 1, 'Page must not scroll horizontally, including with a desktop scrollbar gutter: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
-            const orderCenter = landscape ? viewport.width / 4 : dimensions.hero.x + dimensions.hero.width / 2 - (viewport.width >= 1024 ? 40 : 0);
+            const orderCenter = landscape ? viewport.width / 4 : dimensions.hero.x + dimensions.hero.width / 2 - (viewport.width >= 1024 ? 64 : 0);
             assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - orderCenter) < 2, 'Shift Order Now slightly left on desktop while keeping mobile centered');
             assert.strictEqual(await page.locator('.rcs-floating-action-directions').count(), 0, 'Remove the floating location button from the markup');
             assert(dimensions.order.width >= (landscape || viewport.width < 360 ? 200 : viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (landscape || viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');

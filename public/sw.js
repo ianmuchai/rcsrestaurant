@@ -1,4 +1,4 @@
-const CACHE_NAME = "rcs-pwa-ui-install-20261017-v3";
+const CACHE_NAME = "rcs-pwa-hero-balance-20261017-v4";
 const APP_ASSETS = [
     "/manifest.webmanifest",
     "/install-app",
