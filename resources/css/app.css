@@ -2483,6 +2483,11 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     .rcs-hero-page-links a { min-height: 48px; padding-top: 8px; padding-bottom: 8px; }
 }
 
+@media (min-width: 1024px) {
+    .rcs-hero-brand-overlay .rcs-hero-brand-stack { left: calc(50% - 40px); }
+    .rcs-floating-actions .rcs-floating-action-directions { display: none; }
+}
+
 @media (max-width: 359px) {
     .rcs-hero-page-links a { gap: 8px; font-size: 15px; }
     .rcs-hero-page-links a::after { left: 26px; }

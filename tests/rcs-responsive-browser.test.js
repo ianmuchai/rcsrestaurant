@@ -137,7 +137,9 @@ async function main() {
             assert(dimensions.width <= viewport.width + 1, 'Page must not scroll horizontally: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
-            assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - viewport.width / 2) < 2, 'Order Now must be centered across the full video');
+            const orderCenter = viewport.width / 2 - (viewport.width >= 1024 ? 40 : 0);
+            assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - orderCenter) < 2, 'Shift Order Now slightly left on desktop while keeping mobile centered');
+            assert.strictEqual(await page.locator('.rcs-floating-action-directions').isVisible(), viewport.width < 1024, 'Only hide the floating location button on desktop');
             assert(dimensions.order.width >= (viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
             assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Order Now should sit above the vertical midpoint');
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
