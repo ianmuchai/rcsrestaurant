@@ -108,7 +108,8 @@ async function main() {
         if (!process.env.RCS_CHECK_VIDEO) {
             await page.route('https://videos.pexels.com/**', route => route.abort());
         }
-        for (const viewport of [{ width: 320, height: 640 }, { width: 360, height: 740 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }, { width: 1280, height: 650 }, { width: 1440, height: 900 }]) {
+        for (const viewport of [{ width: 320, height: 640 }, { width: 390, height: 568 }, { width: 360, height: 740 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 768, height: 640 }, { width: 768, height: 1024 }, { width: 844, height: 390 }, { width: 568, height: 320 }, { width: 1024, height: 768 }, { width: 1280, height: 650 }, { width: 1440, height: 900 }]) {
+            const landscape = viewport.width < 1024 && viewport.height <= 500 && viewport.width > viewport.height;
             await page.setViewportSize(viewport);
             await page.goto('http://127.0.0.1:' + server.address().port);
             await page.waitForSelector('.rcs-collection');
@@ -137,11 +138,18 @@ async function main() {
             assert(dimensions.width <= viewport.width + 1, 'Page must not scroll horizontally: ' + JSON.stringify({ viewport, dimensions }));
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
-            const orderCenter = viewport.width / 2 - (viewport.width >= 1024 ? 40 : 0);
+            const orderCenter = landscape ? viewport.width / 4 : viewport.width / 2 - (viewport.width >= 1024 ? 40 : 0);
             assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - orderCenter) < 2, 'Shift Order Now slightly left on desktop while keeping mobile centered');
             assert.strictEqual(await page.locator('.rcs-floating-action-directions').isVisible(), viewport.width < 1024, 'Only hide the floating location button on desktop');
-            assert(dimensions.order.width >= (viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
-            assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Order Now should sit above the vertical midpoint');
+            assert(dimensions.order.width >= (landscape || viewport.width < 360 ? 200 : viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (landscape || viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
+            if (viewport.width < 1024) {
+                assert(dimensions.order.y >= viewport.height * 0.5 && dimensions.order.bottom <= viewport.height - 70, 'Mobile Order Now should sit low on screen and clear the bottom navigation');
+                assert(Math.abs(dimensions.logo.x + dimensions.logo.width / 2 - (landscape ? viewport.width * 0.75 : viewport.width / 2)) < 2, 'Mobile logo must be centered over its link column');
+                assert.strictEqual(await page.locator('.rcs-hero-page-links').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1, 'Mobile hero links must use a single column');
+            } else {
+                assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Preserve desktop Order Now height');
+                assert(Math.abs(dimensions.logo.x + dimensions.logo.width / 2 - dimensions.heroLinks.x - dimensions.heroLinks.width / 2) < 2, 'Center the desktop logo above its link panel');
+            }
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0, 'Remove the visible restaurant heading');
             assert(dimensions.heroLinks.y >= dimensions.hero.y + 48 && dimensions.heroLinks.bottom < dimensions.hero.bottom, 'Hero links must fit inside the video area');
@@ -158,10 +166,11 @@ async function main() {
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']);
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Each single-word label must fit without clipping');
             assert(dimensions.logo.width <= (viewport.width < 1024 ? 73 : 113), 'Hero logo should use the newly reduced size');
-            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Georgia')), 'Hero links should use the approved elegant serif treatment');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Palatino')), 'Hero links should use the refined serif treatment');
+            assert(await page.locator('.rcs-hero-page-links i:last-child').evaluateAll(arrows => arrows.every(arrow => getComputedStyle(arrow).display === 'none')), 'Remove trailing navigation arrows');
             assert(await page.locator('.rcs-hero-page-links a').evaluateAll(links => links.every(link => {
                 const rule = getComputedStyle(link, '::after');
-                return rule.content === '""' && parseFloat(rule.width) > 0 && parseFloat(rule.width) <= link.clientWidth * 0.56 && rule.height === '1px' && getComputedStyle(link).borderTopWidth === '0px';
+                return rule.content === '""' && parseFloat(rule.width) >= 88 && parseFloat(rule.width) <= link.clientWidth * 0.56 && Math.abs(parseFloat(rule.left) - link.clientWidth / 2) < 1 && rule.height === '1px' && getComputedStyle(link).borderTopWidth === '0px';
             })), 'Every hero underline should be a short, fine rule rather than a full-width divider');
             const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
             await page.evaluate(() => scrollTo(0, 500));
@@ -219,11 +228,12 @@ async function main() {
                 return box.left >= 0 && box.right <= innerWidth + 1 && link.scrollWidth <= link.clientWidth + 1;
             })), 'Footer text and links must fit their columns');
             assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
+            assert(!overlaps(dimensions.order, pauseBox) && !overlaps(dimensions.order, contactsBox), 'Order Now must not overlap floating controls');
             assert(!overlaps(dimensions.heroLinks, contactsBox), 'Reserve space beside hero links for the left-hand controls');
-            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (viewport.width < 1024 ? 15 : 17), 'Hero navigation should be easy to read');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : 22), 'Hero navigation should be larger and prominent');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
                 const box = await page.locator(selector).boundingBox();
-                assert(box.x >= 0 && box.x <= 20, selector + ' must align on the left');
+                assert(box.x >= 0 && box.x <= (landscape && selector === '.rcs-hero-motion-toggle' ? 172 : 20), selector + ' must remain in the left control area');
             }
             if ([390, 1440].includes(viewport.width)) {
                 await page.locator('.menu-slides').scrollIntoViewIfNeeded();
