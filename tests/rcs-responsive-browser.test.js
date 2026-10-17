@@ -155,7 +155,7 @@ async function main() {
                 assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Preserve desktop Order Now height');
                 assert(Math.abs(dimensions.logo.x + dimensions.logo.width / 2 - dimensions.heroLinks.x - dimensions.heroLinks.width / 2) < 2, 'Center the desktop logo above its link panel');
             }
-            assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
+            assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'ORDER NOW');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0, 'Remove the visible restaurant heading');
             assert(dimensions.heroLinks.y >= dimensions.hero.y + 48 && dimensions.heroLinks.bottom < dimensions.hero.bottom, 'Hero links must fit inside the video area');
             assert.strictEqual(await page.locator('.rcs-collection').count(), 2);

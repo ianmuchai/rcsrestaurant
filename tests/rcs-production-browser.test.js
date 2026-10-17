@@ -21,7 +21,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.strictEqual(await page.locator('.rcs-featured-glass-section').count(), 0);
             assert(heldRequests.length > 0, 'Test must exercise pending backend requests');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0);
-            assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
+            assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'ORDER NOW');
+            assert(await page.locator('.rcs-hero-order-button').evaluate(el => getComputedStyle(el).fontFamily.includes('Public Sans') && getComputedStyle(el).fontWeight === '600'), 'Order Now should use Public Sans semibold');
             const order = await page.locator('.rcs-hero-order-button').boundingBox();
             if (viewport.width < 1024) {
                 assert(order.y >= viewport.height * (landscape ? 0.45 : 0.7) && order.y + order.height <= viewport.height - 70, 'Raised mobile Order Now must remain clear of the bottom bar');

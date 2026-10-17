@@ -1,4 +1,4 @@
-const CACHE_NAME = "rcs-pwa-mobile-controls-20261017-v5";
+const CACHE_NAME = "rcs-pwa-order-type-20261017-v6";
 const APP_ASSETS = [
     "/manifest.webmanifest",
     "/install-app",

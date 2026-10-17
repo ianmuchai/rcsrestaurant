@@ -2310,7 +2310,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     align-items: center;
     justify-content: center;
     align-self: center;
-    gap: 10px;
+    gap: 12px;
     min-width: 280px;
     min-height: 72px;
     margin-left: auto;
@@ -2320,13 +2320,14 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     padding: 16px 28px;
     background: #00A800;
     color: #ffffff;
-    font-family: "Inter", "Rubik", sans-serif;
+    font-family: "Public Sans", "Rubik", sans-serif;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0;
-    line-height: 1;
+    word-spacing: 0.18em;
+    line-height: 1.2;
     text-align: center;
-    text-transform: none;
+    text-transform: uppercase;
     box-shadow: 0 18px 44px rgba(0, 168, 0, 0.38);
     transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }

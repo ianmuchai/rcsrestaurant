@@ -233,7 +233,7 @@ assert(
         && cssSource.includes("font-size: 15px")
         && cssSource.includes("font-weight: 700")
         && cssSource.includes("letter-spacing: 0")
-        && cssSource.includes("text-transform: none")
+        && cssSource.includes("text-transform: uppercase")
         && cssSource.includes(".rcs-hero-menu-button")
         && cssSource.includes("position: fixed")
         && cssSource.includes("top: 74px")
