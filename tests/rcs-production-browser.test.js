@@ -24,7 +24,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             const order = await page.locator('.rcs-hero-order-button').boundingBox();
             if (viewport.width < 1024) {
-                assert(order.y >= viewport.height * (landscape ? 0.5 : 0.7) && order.y + order.height <= viewport.height - 70, 'Mobile Order Now must be near the bottom, clear of the bottom bar');
+                assert(order.y >= viewport.height * (landscape ? 0.45 : 0.7) && order.y + order.height <= viewport.height - 70, 'Raised mobile Order Now must remain clear of the bottom bar');
             }
             const heroBounds = await page.locator('.rcs-front-video-hero').boundingBox();
             assert(Math.abs(order.x + order.width / 2 - (landscape ? viewport.width / 4 : heroBounds.x + heroBounds.width / 2 - (viewport.width >= 1024 ? 64 : 0))) < 2, 'Keep responsive Order Now alignment');
@@ -52,6 +52,10 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             const logo = await page.locator('.rcs-hero-centered-logo').boundingBox();
             assert(logo.width <= (viewport.width < 1024 ? 73 : 113), 'Production hero must use the newly reduced logo');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
+                if (viewport.width < 1024 && selector === '.rcs-hero-motion-toggle') {
+                    assert.strictEqual(await page.locator(selector).isVisible(), false, 'Hide the video pause control on mobile');
+                    continue;
+                }
                 const control = await page.locator(selector).boundingBox();
                 assert(control.x >= 0 && control.x <= (landscape && selector === '.rcs-hero-motion-toggle' ? 172 : 20), 'Production controls must remain in the left-hand area: ' + selector);
             }

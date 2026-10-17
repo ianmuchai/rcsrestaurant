@@ -148,7 +148,7 @@ async function main() {
             assert.strictEqual(await page.locator('.rcs-floating-action-directions').count(), 0, 'Remove the floating location button from the markup');
             assert(dimensions.order.width >= (landscape || viewport.width < 360 ? 200 : viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (landscape || viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
             if (viewport.width < 1024) {
-                assert(dimensions.order.y >= viewport.height * 0.5 && dimensions.order.bottom <= viewport.height - 70, 'Mobile Order Now should sit low on screen and clear the bottom navigation');
+                assert(dimensions.order.y >= viewport.height * (landscape ? 0.45 : 0.5) && dimensions.order.bottom <= viewport.height - 70, 'Raised mobile Order Now must remain clear of the bottom navigation');
                 assert(Math.abs(dimensions.logo.x + dimensions.logo.width / 2 - (landscape ? viewport.width * 0.75 : viewport.width / 2)) < 2, 'Mobile logo must be centered over its link column');
                 assert.strictEqual(await page.locator('.rcs-hero-page-links').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1, 'Mobile hero links must use a single column');
             } else {
@@ -162,10 +162,14 @@ async function main() {
             assert.strictEqual(await page.locator('.rcs-menu-collections p, .rcs-front-video-hero p').count(), 0, 'Homepage should not repeat marketing sentences');
             assert(await page.locator('.rcs-promo-poster').evaluateAll(images => images.every(image => Math.abs(image.width / image.height - 1.5) < 0.02 && getComputedStyle(image).objectFit === 'contain')), 'Show complete posters without cropping their text');
             assert(await page.locator('.rcs-collection img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0)), 'All collection food images must load');
-            await page.getByRole('button', { name: 'Pause background videos' }).click();
-            await page.getByRole('button', { name: 'Play background videos' }).waitFor();
-            assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Pause must stop carousel motion');
-            await page.getByRole('button', { name: 'Play background videos' }).click();
+            if (viewport.width >= 1024) {
+                await page.getByRole('button', { name: 'Pause background videos' }).click();
+                await page.getByRole('button', { name: 'Play background videos' }).waitFor();
+                assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Pause must stop carousel motion');
+                await page.getByRole('button', { name: 'Play background videos' }).click();
+            } else {
+                assert.strictEqual(await page.locator('.rcs-hero-motion-toggle').isVisible(), false);
+            }
             assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: /^MENU$/ }).getAttribute('href'), '/menu');
             assert.strictEqual(await page.locator('.rcs-hero-page-links a').filter({ hasText: /^ORDERS$/ }).getAttribute('href'), '/my-orders');
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']);
@@ -241,13 +245,14 @@ async function main() {
                 return box.left >= 0 && box.right <= innerWidth + 1 && link.scrollWidth <= link.clientWidth + 1;
             })), 'Footer text and links must fit their columns');
             for (const control of [contactButton, whatsappBox]) {
-                assert(!overlaps(pauseBox, control), 'Pause and contact buttons must not overlap');
+                assert(!pauseBox || !overlaps(pauseBox, control), 'Pause and contact buttons must not overlap');
                 assert(!overlaps(dimensions.order, control), 'Order Now must not overlap contact buttons');
                 assert(!overlaps(dimensions.heroLinks, control), 'Reserve space beside hero links for contact buttons');
             }
-            assert(!overlaps(dimensions.order, pauseBox), 'Order Now must not overlap the video control');
+            assert(!pauseBox || !overlaps(dimensions.order, pauseBox), 'Order Now must not overlap the video control');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : viewport.width < 1024 ? 26 : 28), 'Hero navigation must use the newly enlarged type sizes');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
+                if (viewport.width < 1024 && selector === '.rcs-hero-motion-toggle') continue;
                 const box = await page.locator(selector).boundingBox();
                 assert(box.x >= 0 && box.x <= (landscape && selector === '.rcs-hero-motion-toggle' ? 172 : 20), selector + ' must remain in the left control area');
             }
