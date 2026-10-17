@@ -167,7 +167,8 @@ async function main() {
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Each single-word label must fit without clipping');
             assert(dimensions.logo.width <= (viewport.width < 1024 ? 73 : 113), 'Hero logo should use the newly reduced size');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Palatino')), 'Hero links should use the refined serif treatment');
-            assert(await page.locator('.rcs-hero-page-links i:last-child').evaluateAll(arrows => arrows.every(arrow => getComputedStyle(arrow).display === 'none')), 'Remove trailing navigation arrows');
+            assert.strictEqual(await page.locator('.rcs-hero-page-links .fa-arrow-right, .rcs-hero-page-links .fa-arrow-up-right-from-square').count(), 0, 'Remove trailing arrows from the component markup');
+            assert(dimensions.logo.y < dimensions.hero.y + (viewport.width < 1024 ? 120 : dimensions.hero.height * 0.25), 'Move the logo and link section higher in the hero');
             assert(await page.locator('.rcs-hero-page-links a').evaluateAll(links => links.every(link => {
                 const rule = getComputedStyle(link, '::after');
                 return rule.content === '""' && parseFloat(rule.width) >= 88 && parseFloat(rule.width) <= link.clientWidth * 0.56 && Math.abs(parseFloat(rule.left) - link.clientWidth / 2) < 1 && rule.height === '1px' && getComputedStyle(link).borderTopWidth === '0px';
@@ -230,7 +231,7 @@ async function main() {
             assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
             assert(!overlaps(dimensions.order, pauseBox) && !overlaps(dimensions.order, contactsBox), 'Order Now must not overlap floating controls');
             assert(!overlaps(dimensions.heroLinks, contactsBox), 'Reserve space beside hero links for the left-hand controls');
-            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : 22), 'Hero navigation should be larger and prominent');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : viewport.width < 1024 ? 26 : 28), 'Hero navigation must use the newly enlarged type sizes');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
                 const box = await page.locator(selector).boundingBox();
                 assert(box.x >= 0 && box.x <= (landscape && selector === '.rcs-hero-motion-toggle' ? 172 : 20), selector + ' must remain in the left control area');

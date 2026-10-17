@@ -28,6 +28,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert(Math.abs(order.x + order.width / 2 - (landscape ? viewport.width / 4 : viewport.width / 2 - (viewport.width >= 1024 ? 40 : 0))) < 2, 'Keep responsive Order Now alignment');
             assert.strictEqual(await page.locator('.rcs-floating-action-directions').isVisible(), viewport.width < 1024, 'Keep mobile location control but hide it on desktop');
             assert.strictEqual(await page.locator('.rcs-hero-link-panel .rcs-hero-centered-logo').count(), 1);
+            assert.strictEqual(await page.locator('.rcs-hero-page-links .fa-arrow-right, .rcs-hero-page-links .fa-arrow-up-right-from-square').count(), 0, 'Production must not contain navigation arrows');
+            assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (landscape ? 18 : viewport.width < 1024 ? 26 : 28), 'Production must use the newly enlarged hero type');
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'FEEDBACK']);
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Production labels must fit on narrow phones');
             const heroLink = page.locator('.rcs-hero-page-links a').first();

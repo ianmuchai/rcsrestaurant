@@ -41,6 +41,7 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
         && underline.nodes.some(node => node.prop === 'left' && node.value === '50%'), 'Hero links need longer centered hairline underlines');
     assert(slider.includes('<video') && slider.includes('playsinline') && !slider.includes(':poster='));
     assert(slider.includes('rcs-hero-page-links') && slider.includes('<h1'));
+    assert(!slider.includes('fa-arrow-right') && !slider.includes('fa-arrow-up-right-from-square'), 'Remove hero arrows from markup rather than merely hiding them');
     for (const label of ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']) {
         assert(slider.includes('<span>' + label + '</span>'), 'Hero links should have single-word uppercase labels: ' + label);
     }

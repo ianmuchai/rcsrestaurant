@@ -27,7 +27,7 @@ const footerSource = readVue(footerPath);
 const mobileNavSource = readVue(mobileNavPath);
 const cssSource = fs.readFileSync(cssPath, "utf8");
 const workerSource = fs.readFileSync(path.join(root, 'public/sw.js'), 'utf8');
-assert(workerSource.includes('rcs-pwa-mobile-20261014'),
+assert(workerSource.includes('rcs-pwa-hero-20261017-v2'),
     'Existing PWA installations should refresh their asset cache for the mobile layout release');
 
 assert(
