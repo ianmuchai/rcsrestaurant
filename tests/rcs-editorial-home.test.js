@@ -33,6 +33,11 @@ for (const file of [base + 'HomeComponent.vue', base + 'TrackOrderComponent.vue'
     const fallback = component.computed.collections.call({ ...state, categories: [] });
     assert(fallback.every(x => !x.to.query), 'Unavailable categories must fall back to the complete menu');
     const slider = fs.readFileSync(base + 'SliderComponent.vue', 'utf8');
+    const styles = require('postcss').parse(fs.readFileSync('resources/css/app.css', 'utf8'));
+    const heroLinkRule = styles.nodes.find(node => node.selector === '.rcs-hero-page-links a');
+    assert(!heroLinkRule.nodes.some(node => node.prop === 'border-top'), 'Replace full-width hero dividers with short underlines');
+    const underline = styles.nodes.find(node => node.selector === '.rcs-hero-page-links a::after');
+    assert(underline && underline.nodes.some(node => node.prop === 'width' && node.value === '72px'), 'Hero links need restrained short underlines');
     assert(slider.includes('<video') && slider.includes('playsinline') && !slider.includes(':poster='));
     assert(slider.includes('rcs-hero-page-links') && slider.includes('<h1'));
     for (const label of ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'ABOUT', 'FEEDBACK']) {

@@ -28,8 +28,9 @@ import itemDesignEnum from './resources/js/enums/modules/itemDesignEnum';
 const names = ['frontend.home', 'frontend.menu', 'frontend.offers', 'auth.login', 'frontend.installApp', 'frontend.search', 'frontend.page', 'frontend.myOrder'];
 const router = createRouter({ history: createWebHistory(), routes: names.map((name, i) => ({ name, path: i === 0 ? '/' : name === 'frontend.installApp' ? '/install-app' : name === 'frontend.page' ? '/page/:slug' : name === 'frontend.myOrder' ? '/my-orders' : '/' + name.split('.').pop(), meta: { isFrontend: true }, component: { template: '<div />' } })) });
 const app = createApp({ components: { Mobile, Footer, Slider, Items, Category, GoogleAuth, Collections, QuickActions },
-  data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 1,250.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
-  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><Collections :categories="categories" /><Footer /><Mobile /><QuickActions /></div>'
+  data: () => ({ categoryDesign: categoryDesignEnum.FIRST, categories: ['breakfast', 'teas-coffee', 'rcs-signatures', 'rice-pastas', 'fish-chicken-meat', 'fast-foods', 'beverages', 'appetizers'].map((slug, id) => ({ id, slug, name: slug, thumb: '/images/rcs-cafe-cover.jpg' })), design: itemDesignEnum.GRID, listDesign: itemDesignEnum.LIST, items: [1, 2, 3, 4].map(id => ({ id, name: 'Grilled chicken family platter', description: 'Freshly prepared chicken with rice and seasonal vegetables', currency_price: 'Ksh. 123,450.00', offer: [], cover: '/images/rcs-cafe-cover.jpg', thumb: '/images/rcs-cafe-cover.jpg', item_type: 1 })) }),
+  computed: { cardDesign() { return this.$route.query.cards === 'list' ? this.listDesign : this.design; } },
+  template: '<div v-if="$route.query.google" style="width: 304px; max-width: 100%; margin: 20px auto"><GoogleAuth /></div><div v-else-if="$route.query.cards" class="rcs-frontend-layout"><Mobile /><main class="container" style="padding-top: 16px"><Items :items="items" :type="null" :design="cardDesign" /></main></div><div v-else class="rcs-frontend-layout"><Slider /><Category :categories="categories" :design="categoryDesign" /><Collections :categories="categories" /><Footer /><Mobile /><QuickActions /></div>'
 });
 app.config.globalProperties.$store = { getters: {
  'authStatus': false, 'frontendItemCategory/lists': [{ slug: 'breakfast' }], 'frontendCart/subtotal': 0,
@@ -107,7 +108,7 @@ async function main() {
         if (!process.env.RCS_CHECK_VIDEO) {
             await page.route('https://videos.pexels.com/**', route => route.abort());
         }
-        for (const viewport of [{ width: 320, height: 740 }, { width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }, { width: 1280, height: 650 }, { width: 1440, height: 900 }]) {
+        for (const viewport of [{ width: 320, height: 640 }, { width: 360, height: 740 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }, { width: 1280, height: 650 }, { width: 1440, height: 900 }]) {
             await page.setViewportSize(viewport);
             await page.goto('http://127.0.0.1:' + server.address().port);
             await page.waitForSelector('.rcs-collection');
@@ -137,7 +138,7 @@ async function main() {
             assert.strictEqual(dimensions.overflow, 0, 'Card content must stay within cards');
             assert(dimensions.logo.bottom < dimensions.heroLinks.y, 'Logo must sit above the hero page links');
             assert(Math.abs(dimensions.order.x + dimensions.order.width / 2 - viewport.width / 2) < 2, 'Order Now must be centered across the full video');
-            assert(dimensions.order.width >= 240 && dimensions.order.height >= 64, 'Order Now should be larger and easy to tap');
+            assert(dimensions.order.width >= (viewport.width < 640 ? 208 : 240) && dimensions.order.height >= (viewport.width < 640 ? 56 : 64), 'Order Now must retain a comfortable touch target');
             assert(dimensions.order.y + dimensions.order.height / 2 - dimensions.hero.y < dimensions.hero.height / 2, 'Order Now should sit above the vertical midpoint');
             assert.strictEqual(await page.locator('.rcs-hero-order-button').innerText(), 'Order Now');
             assert.strictEqual(await page.locator('.rcs-hero-introduction h1').count(), 0, 'Remove the visible restaurant heading');
@@ -156,6 +157,10 @@ async function main() {
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Each single-word label must fit without clipping');
             assert(dimensions.logo.width <= (viewport.width < 1024 ? 73 : 113), 'Hero logo should use the newly reduced size');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => getComputedStyle(el).fontFamily.includes('Georgia')), 'Hero links should use the approved elegant serif treatment');
+            assert(await page.locator('.rcs-hero-page-links a').evaluateAll(links => links.every(link => {
+                const rule = getComputedStyle(link, '::after');
+                return rule.content === '""' && parseFloat(rule.width) > 0 && parseFloat(rule.width) <= link.clientWidth * 0.56 && rule.height === '1px' && getComputedStyle(link).borderTopWidth === '0px';
+            })), 'Every hero underline should be a short, fine rule rather than a full-width divider');
             const fixedBefore = await page.locator('.rcs-floating-actions').boundingBox();
             await page.evaluate(() => scrollTo(0, 500));
             const fixedAfter = await page.locator('.rcs-floating-actions').boundingBox();
@@ -194,6 +199,23 @@ async function main() {
             assert(!overlaps(dimensions.order, dimensions.logo) && !overlaps(dimensions.order, dimensions.heroLinks), 'Hero navigation and logo must not cover Order Now');
             const pauseBox = await page.locator('.rcs-hero-motion-toggle').boundingBox();
             const contactsBox = await page.locator('.rcs-floating-actions').boundingBox();
+            const menuBox = await page.locator('.rcs-hero-menu-button').boundingBox();
+            const contactButton = await page.locator('.rcs-floating-action-call').boundingBox();
+            if (viewport.width < 640) {
+                assert.strictEqual(menuBox.width, 52, 'Mobile floating Menu should be compact');
+                assert.strictEqual(contactButton.width, 44, 'Mobile contact buttons should keep 44px touch targets');
+                assert(dimensions.footer.height < 570, 'Mobile footer should avoid the old unbalanced tall layout');
+                const footerLayout = await page.locator('.rcs-footer-quicklinks').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+                assert.strictEqual(footerLayout, 2, 'Mobile footer links should use two balanced columns');
+            } else if (viewport.width >= 1024) {
+                assert.strictEqual(menuBox.width, 72, 'Preserve desktop Menu size');
+                assert.strictEqual(contactButton.width, 52, 'Preserve desktop contact icon sizes');
+                assert.strictEqual(pauseBox.width, 48, 'Preserve desktop video control size');
+            }
+            assert(await page.locator('.rcs-footer-strip a').evaluateAll(links => links.every(link => {
+                const box = link.getBoundingClientRect();
+                return box.left >= 0 && box.right <= innerWidth + 1 && link.scrollWidth <= link.clientWidth + 1;
+            })), 'Footer text and links must fit their columns');
             assert(!overlaps(pauseBox, contactsBox), 'Pause and floating contact controls must not overlap');
             assert(!overlaps(dimensions.heroLinks, contactsBox), 'Reserve space beside hero links for the left-hand controls');
             assert(await page.locator('.rcs-hero-page-links a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)) >= (viewport.width < 1024 ? 15 : 17), 'Hero navigation should be easy to read');
@@ -247,6 +269,26 @@ async function main() {
         assert(await page.locator('.rcs-plain-video-carousel').evaluate(el => !el.swiper.autoplay.running), 'Reduced motion must disable background autoplay');
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.setViewportSize({ width: 390, height: 844 });
+        for (const width of [320, 390]) {
+            await page.setViewportSize({ width, height: 844 });
+            for (const mode of ['grid', 'list']) {
+                await page.goto('http://127.0.0.1:' + server.address().port + '/?cards=' + mode);
+                const cards = page.locator('.product-card-' + mode);
+                await cards.first().waitFor({ state: 'visible' });
+                assert.strictEqual(await cards.count(), 4);
+                assert(await cards.evaluateAll(elements => elements.every(card => {
+                    const box = card.getBoundingClientRect();
+                    return box.right <= innerWidth + 1 && [...card.querySelectorAll('h3, h4, p, button')].every(child => {
+                        const rect = child.getBoundingClientRect();
+                        return rect.left >= box.left - 1 && rect.right <= box.right + 1 && child.scrollWidth <= child.clientWidth + 1;
+                    });
+                })), 'Menu card text, prices and buttons must fit: ' + width + ' ' + mode);
+                const add = await page.locator('.product-card-' + mode + '-cart-btn').first().boundingBox();
+                assert(add.height >= 40, 'Menu Add buttons need comfortable touch targets');
+                await page.screenshot({ path: path.join(os.tmpdir(), 'rcs-menu-' + mode + '-' + width + '.png'), fullPage: true });
+                console.log('Mobile menu cards fit:', width, mode);
+            }
+        }
         const googleTestUrl = 'http://127.0.0.1:' + server.address().port + '/?google=1';
         await page.goto(googleTestUrl);
         await page.getByRole('button', { name: 'Sign up with Google' }).click();

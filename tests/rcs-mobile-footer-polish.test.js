@@ -83,3 +83,7 @@ assert(
 );
 
 console.log("RC's mobile and footer polish contract passed");
+
+assert(cssSource.includes('grid-template-areas: "brand links downloads contact"')
+    && cssSource.includes('grid-template-areas: "brand brand" "links links" "downloads contact"'),
+    'Footer should have explicit desktop and phone group placement');

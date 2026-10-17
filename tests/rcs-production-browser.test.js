@@ -23,6 +23,16 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
             assert.strictEqual(await page.locator('.rcs-hero-link-panel .rcs-hero-centered-logo').count(), 1);
             assert.deepStrictEqual(await page.locator('.rcs-hero-page-links span').allTextContents(), ['MENU', 'OFFERS', 'LOCATION', 'ORDERS', 'FEEDBACK']);
             assert(await page.locator('.rcs-hero-page-links span').evaluateAll(labels => labels.every(label => label.scrollWidth <= label.clientWidth + 1)), 'Production labels must fit on narrow phones');
+            const heroLink = page.locator('.rcs-hero-page-links a').first();
+            assert(await heroLink.evaluate(el => {
+                const line = getComputedStyle(el, '::after');
+                return line.content === '""' && line.height === '1px' && parseFloat(line.width) < el.clientWidth * 0.56;
+            }), 'Production should show shortened hairline underlines');
+            if (viewport.width >= 1024) {
+                await heroLink.hover();
+                await page.waitForFunction(() => parseFloat(getComputedStyle(document.querySelector('.rcs-hero-page-links a'), '::after').width) >= 95);
+                await page.mouse.move(0, 0);
+            }
             const logo = await page.locator('.rcs-hero-centered-logo').boundingBox();
             assert(logo.width <= (viewport.width < 1024 ? 73 : 113), 'Production hero must use the newly reduced logo');
             for (const selector of ['.rcs-floating-actions', '.rcs-hero-menu-button', '.rcs-hero-motion-toggle']) {
